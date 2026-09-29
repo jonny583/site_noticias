@@ -1,0 +1,11 @@
+{
+  "atualizadoEm": "",
+  "itens": [
+    { "nome": "Selic", "valor": "—", "tendencia": "" },
+    { "nome": "INCC-M (mês)", "valor": "—", "tendencia": "" },
+    { "nome": "IGP-M (12m)", "valor": "—", "tendencia": "" },
+    { "nome": "IPCA (12m)", "valor": "—", "tendencia": "" },
+    { "nome": "FipeZap venda (mês)", "valor": "—", "tendencia": "" },
+    { "nome": "Dólar", "valor": "—", "tendencia": "" }
+  ]
+}

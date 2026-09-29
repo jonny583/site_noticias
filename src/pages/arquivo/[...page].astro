@@ -1,0 +1,27 @@
+---
+import type { GetStaticPaths } from "astro";
+import Base from "../../layouts/Base.astro";
+import Grade from "../../components/Grade.astro";
+import JanelaNoticia from "../../components/JanelaNoticia.astro";
+import { noticiasPublicadas, type Noticia } from "../../lib/conteudo";
+import { textos } from "../../i18n";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  return paginate(await noticiasPublicadas(), { pageSize: 24 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as { page: { data: Noticia[]; currentPage: number; lastPage: number; url: { prev?: string; next?: string } } };
+const t = textos();
+---
+<Base titulo={`${t.arquivo} · ${t.pagina} ${page.currentPage}`}>
+  <div class="titulo-pagina">
+    <span class="etiqueta">{t.pagina} {page.currentPage} / {page.lastPage}</span>
+    <h1>{t.arquivo}</h1>
+  </div>
+  <Grade noticias={page.data} />
+  <nav class="paginacao">
+    {page.url.prev ? <a class="botao" href={page.url.prev}>{t.maisRecentes}</a> : <span></span>}
+    {page.url.next && <a class="botao" href={page.url.next}>{t.maisAntigas}</a>}
+  </nav>
+  <JanelaNoticia slot="depois" noticias={page.data} />
+</Base>

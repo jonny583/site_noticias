@@ -1,0 +1,16 @@
+---
+import { SITE } from "../config.js";
+import { textos } from "../i18n";
+const t = textos();
+const demo = !SITE.newsletterAction;
+---
+<section class="news" id="newsletter">
+  <div>
+    <h2>{t.newsTitulo}</h2>
+    <p>{t.newsTexto}</p>
+  </div>
+  <form action={demo ? undefined : SITE.newsletterAction} method="post" target="_blank" data-newsletter={demo ? "demo" : undefined} data-ok={t.newsOk}>
+    <input type="email" name="email" required placeholder="seu@email.com.br" aria-label={t.seuEmail} />
+    <button type="submit">{t.newsBotao}</button>
+  </form>
+</section>

@@ -1,0 +1,34 @@
+---
+// Janela que abre a notícia por cima da página (o "+").
+// Recebe os dados das notícias da página em JSON para não precisar recarregar.
+import { paraJanela, type Noticia } from "../lib/conteudo";
+import { textos } from "../i18n";
+interface Props { noticias: Noticia[] }
+const { noticias } = Astro.props;
+const t = textos();
+const dados = Object.fromEntries(noticias.map((n) => [n.id, paraJanela(n)]));
+const rotulos = { fonte: t.fonte, foto: t.foto, avisoIA: t.avisoIA, linkCopiado: t.linkCopiado };
+const json = (x: unknown) => JSON.stringify(x).replace(/</g, "\\u003c");
+---
+<script type="application/json" id="dados-noticias" set:html={json(dados)} />
+<script type="application/json" id="rotulos-janela" set:html={json(rotulos)} />
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-titulo">
+  <div class="fundo" data-fechar></div>
+  <article class="janela">
+    <button class="fechar" data-fechar aria-label={t.fechar}>×</button>
+    <div class="foto-janela">
+      <div class="sem-foto" aria-hidden="true"><span id="m-rotulo"></span></div>
+      <img id="m-img" alt="" referrerpolicy="no-referrer" />
+    </div>
+    <div class="conteudo">
+      <div class="tags" id="m-tags"></div>
+      <h2 id="m-titulo"></h2>
+      <p class="resumo" id="m-resumo"></p>
+      <div class="credito" id="m-credito"></div>
+      <div class="acoes">
+        <a class="botao cheio" id="m-fonte" href="#" target="_blank" rel="noopener">{t.lerNaFonte}</a>
+        <button class="botao" data-compartilhar>{t.compartilhar}</button>
+      </div>
+    </div>
+  </article>
+</div>

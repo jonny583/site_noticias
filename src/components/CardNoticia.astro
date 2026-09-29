@@ -1,0 +1,30 @@
+---
+import Foto from "./Foto.astro";
+import { nomeCategoria, type Noticia } from "../lib/conteudo";
+import { localeData, textos } from "../i18n";
+interface Props { noticia: Noticia }
+const { noticia } = Astro.props;
+const d = noticia.data;
+const t = textos();
+const cat = nomeCategoria(d.categoria);
+const href = `/noticia/${noticia.id}/`;
+---
+<article class="post">
+  <div class="foto">
+    <Foto src={d.imagem} rotulo={cat} />
+    <a class="etiqueta" href={`/categoria/${d.categoria}/`}>{cat}</a>
+  </div>
+  <div class="corpo">
+    <h3><a href={href} data-abrir={noticia.id}>{d.titulo}</a></h3>
+    <p>{d.resumo}</p>
+    <div class="rodape">
+      <span class="fonte">
+        {t.via} <b>{d.fonte.nome}</b><br />
+        <time datetime={d.publicadoEm.toISOString()} data-relativo>
+          {d.publicadoEm.toLocaleDateString(localeData(), { day: "numeric", month: "short" })}
+        </time>{d.regiao && ` · ${d.regiao}`}
+      </span>
+      <a class="mais" href={href} data-abrir={noticia.id} aria-label={`${t.abrirNoticia}: ${d.titulo}`}>+</a>
+    </div>
+  </div>
+</article>

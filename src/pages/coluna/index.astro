@@ -1,0 +1,29 @@
+---
+import Base from "../../layouts/Base.astro";
+import { colunas, dataCompleta } from "../../lib/conteudo";
+import { SITE } from "../../config.js";
+import { textos } from "../../i18n";
+const t = textos();
+const posts = await colunas();
+---
+<Base titulo={t.coluna} editoria="coluna">
+  <div class="titulo-pagina">
+    <span class="etiqueta clara">{t.colunaAutoral}</span>
+    <h1>{t.coluna} · {SITE.colunista}</h1>
+  </div>
+  {posts.length ? (
+    <ul class="lista-coluna">
+      {posts.map((p) => (
+        <li>
+          <a href={`/coluna/${p.id}/`}>
+            <span class="fonte">{dataCompleta(p.data.publicadoEm)}</span>
+            <h2>{p.data.titulo}</h2>
+            <p>{p.data.resumo}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p class="vazio">{t.nenhuma}</p>
+  )}
+</Base>

@@ -1,0 +1,18 @@
+---
+// Foto da fonte com "plano B": se não houver imagem ou ela falhar,
+// aparece um bloco gráfico com o nome da editoria.
+interface Props { src?: string; rotulo: string; credito?: string; ansioso?: boolean }
+const { src, rotulo, credito, ansioso = false } = Astro.props;
+---
+<div class="sem-foto" aria-hidden="true"><span>{rotulo}</span></div>
+{src && (
+  <img
+    src={src}
+    alt=""
+    loading={ansioso ? "eager" : "lazy"}
+    decoding="async"
+    referrerpolicy="no-referrer"
+    onerror="this.classList.add('quebrada')"
+  />
+)}
+{src && credito && <span class="credito-foto">{credito}</span>}

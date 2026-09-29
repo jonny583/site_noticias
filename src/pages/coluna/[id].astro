@@ -1,0 +1,27 @@
+---
+import { render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { colunas, dataCompleta, type Coluna } from "../../lib/conteudo";
+import { SITE } from "../../config.js";
+import { textos } from "../../i18n";
+
+export async function getStaticPaths() {
+  return (await colunas()).map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+interface Props { post: Coluna }
+const { post } = Astro.props;
+const { Content } = await render(post);
+const t = textos();
+---
+<Base titulo={post.data.titulo} descricao={post.data.resumo} imagem={post.data.imagem} editoria="coluna" tipo="article">
+  <div class="titulo-pagina">
+    <span class="etiqueta clara">{t.colunaAutoral}</span>
+    <h1>{post.data.titulo}</h1>
+    <p>{SITE.colunista} · {dataCompleta(post.data.publicadoEm)}</p>
+  </div>
+  <article class="texto-corrido">
+    <Content />
+    {post.data.urlOriginal && <p><a href={post.data.urlOriginal} target="_blank" rel="noopener">Publicado originalmente no blog ↗</a></p>}
+    <p><a class="botao" href="/coluna/">{t.todasColunas}</a></p>
+  </article>
+</Base>

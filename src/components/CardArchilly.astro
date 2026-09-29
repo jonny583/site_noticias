@@ -1,0 +1,23 @@
+---
+import Foto from "./Foto.astro";
+import type { CardArchilly } from "../lib/conteudo";
+import { textos } from "../i18n";
+interface Props { card: CardArchilly }
+const { card } = Astro.props;
+const d = card.data;
+const t = textos();
+---
+<article class="post archilly">
+  <div class="foto">
+    <Foto src={d.imagem} rotulo="Archilly" />
+    <span class="etiqueta">Archilly</span>
+  </div>
+  <div class="corpo">
+    <h3>{d.titulo}</h3>
+    <p>{d.resumo}</p>
+    <div class="rodape">
+      <span class="fonte">{t.conteudoArchilly} <b>Archilly</b></span>
+      <a class="mais" href={d.url} target="_blank" rel="noopener" aria-label={d.chamada}>→</a>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,27 @@
+---
+import Base from "../../layouts/Base.astro";
+import Grade from "../../components/Grade.astro";
+import JanelaNoticia from "../../components/JanelaNoticia.astro";
+import { CATEGORIAS, type Categoria } from "../../lib/categorias";
+import { noticiasPublicadas, cardsArchilly, nomeCategoria } from "../../lib/conteudo";
+import { textos } from "../../i18n";
+
+export function getStaticPaths() {
+  return CATEGORIAS.map((cat) => ({ params: { cat } }));
+}
+const cat = Astro.params.cat as Categoria;
+const t = textos();
+const nome = nomeCategoria(cat);
+const lista = (await noticiasPublicadas()).filter((n) => n.data.categoria === cat).slice(0, 60);
+const cards = await cardsArchilly();
+---
+<Base titulo={nome} editoria={cat}>
+  <div class="titulo-pagina">
+    <span class="etiqueta">{t.editorias}</span>
+    <h1>{nome}</h1>
+    <p>{lista.length} {lista.length === 1 ? t.noticia : t.noticias}</p>
+  </div>
+  <Grade noticias={lista} cards={cards} />
+  <div class="paginacao"><a class="botao" href="/">{t.voltarInicio}</a></div>
+  <JanelaNoticia slot="depois" noticias={lista} />
+</Base>

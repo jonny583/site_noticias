@@ -1,0 +1,22 @@
+---
+import type { Coluna } from "../lib/conteudo";
+import { SITE } from "../config.js";
+import { textos } from "../i18n";
+interface Props { post?: Coluna }
+const { post } = Astro.props;
+const t = textos();
+---
+{post && (
+  <section class="coluna" aria-label={t.coluna}>
+    <div class="autor">
+      <div class="avatar">{SITE.colunista.charAt(0)}</div>
+      <div><small>{t.coluna}</small><strong>{SITE.colunista}</strong></div>
+    </div>
+    <div>
+      <span class="etiqueta clara">{t.colunaAutoral}</span>
+      <h3>{post.data.titulo}</h3>
+      <p>{post.data.resumo}</p>
+      <a class="botao" href={`/coluna/${post.id}/`}>{t.lerColuna}</a>
+    </div>
+  </section>
+)}

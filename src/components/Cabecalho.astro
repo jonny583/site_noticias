@@ -1,0 +1,27 @@
+---
+import { SITE } from "../config.js";
+import { textos, localeData } from "../i18n";
+interface Props { compacto?: boolean }
+const { compacto = false } = Astro.props;
+const t = textos();
+const hoje = new Date().toLocaleDateString(localeData(), { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+const [a, b] = SITE.nomeMarca;
+---
+<div class="topo">
+  <div class="envelope">
+    <a class="selo" href={SITE.archillyUrl} target="_blank" rel="noopener"><i aria-hidden="true"></i><span>{t.iniciativa} <b>Archilly</b></span></a>
+    <div class="topo-acoes">
+      <a class="botao cheio" href="/#newsletter">{t.receber} <span class="so-desktop">{t.aNewsletter}</span></a>
+      <button class="botao botao-icone" id="tema" aria-label={t.alternarTema}>◐</button>
+    </div>
+  </div>
+</div>
+<header class={compacto ? "cabecalho compacto" : "cabecalho"}>
+  <div class="envelope">
+    {!compacto && <div class="data" id="hoje">{hoje}</div>}
+    <a href="/" aria-label={SITE.nome}>
+      {compacto ? <div class="marca">{a}<span>.</span>{b}</div> : <h1 class="marca">{a}<span>.</span>{b}</h1>}
+    </a>
+    {!compacto && <p class="lema">{t.lema}</p>}
+  </div>
+</header>

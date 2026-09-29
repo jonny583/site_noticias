@@ -1,0 +1,33 @@
+---
+import Base from "../layouts/Base.astro";
+import Indicadores from "../components/Indicadores.astro";
+import Carrossel from "../components/Carrossel.astro";
+import Grade from "../components/Grade.astro";
+import ColunaDestaque from "../components/ColunaDestaque.astro";
+import Newsletter from "../components/Newsletter.astro";
+import JanelaNoticia from "../components/JanelaNoticia.astro";
+import { noticiasPublicadas, colunas, cardsArchilly, escolherDestaques } from "../lib/conteudo";
+import { textos } from "../i18n";
+
+const NA_CAPA = 24;
+const t = textos();
+const todas = await noticiasPublicadas();
+const destaques = escolherDestaques(todas);
+const feed = todas.filter((n) => !destaques.includes(n)).slice(0, NA_CAPA);
+const [ultimaColuna] = await colunas();
+const cards = await cardsArchilly();
+---
+<Base compacto={false}>
+  <Indicadores slot="antes" />
+  <Carrossel noticias={destaques} />
+  <section class="feed" aria-label={t.ultimas}>
+    <div class="rotulo-secao"><h2>{t.ultimas}</h2></div>
+    <Grade noticias={feed} cards={cards} />
+    {todas.length > destaques.length + NA_CAPA && (
+      <div class="ver-todas"><a class="botao" href="/arquivo/">{t.verTodas}</a></div>
+    )}
+  </section>
+  <ColunaDestaque post={ultimaColuna} />
+  <Newsletter />
+  <JanelaNoticia slot="depois" noticias={[...destaques, ...feed]} />
+</Base>

@@ -1,0 +1,20 @@
+---
+import Base from "../layouts/Base.astro";
+import { SITE } from "../config.js";
+---
+<Base titulo="Política de conteúdo">
+  <div class="titulo-pagina">
+    <span class="etiqueta clara">Transparência</span>
+    <h1>Política de conteúdo</h1>
+  </div>
+  <div class="texto-corrido">
+    <h2>Como as notícias são feitas</h2>
+    <p>As notícias do {SITE.nome} são resumos produzidos com auxílio de inteligência artificial a partir de matérias publicadas por outros veículos. Cada resumo é escrito com palavras próprias, limitado a um parágrafo, e traz o nome da fonte, a data e o link para a matéria original.</p>
+    <h2>Imagens</h2>
+    <p>As imagens exibidas são as imagens de divulgação indicadas pelas próprias fontes para compartilhamento, com o crédito correspondente. Elas permanecem de propriedade de seus autores.</p>
+    <h2>Correções e remoção</h2>
+    <p>Se você é autor ou responsável por um conteúdo citado e deseja uma correção, alteração de crédito ou remoção, escreva para <a href={`mailto:${SITE.emailContato}`}>{SITE.emailContato}</a> informando o endereço da página. Atendemos todos os pedidos com prioridade.</p>
+    <h2>Conteúdo patrocinado</h2>
+    <p>Conteúdos da Archilly são sempre identificados com a marca Archilly e nunca aparecem disfarçados de notícia.</p>
+  </div>
+</Base>

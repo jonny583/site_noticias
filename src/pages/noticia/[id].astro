@@ -1,0 +1,62 @@
+---
+// Página própria de cada notícia: é o endereço que aparece ao abrir o "+"
+// e o que as pessoas recebem ao compartilhar (e o que o Google indexa).
+import Base from "../../layouts/Base.astro";
+import Foto from "../../components/Foto.astro";
+import Grade from "../../components/Grade.astro";
+import JanelaNoticia from "../../components/JanelaNoticia.astro";
+import { noticiasPublicadas, nomeCategoria, dataCompleta, type Noticia } from "../../lib/conteudo";
+import { textos } from "../../i18n";
+
+export async function getStaticPaths() {
+  const todas = await noticiasPublicadas();
+  return todas.map((noticia) => ({
+    params: { id: noticia.id },
+    props: { noticia, relacionadas: todas.filter((x) => x.data.categoria === noticia.data.categoria && x.id !== noticia.id).slice(0, 4) },
+  }));
+}
+interface Props { noticia: Noticia; relacionadas: Noticia[] }
+const { noticia, relacionadas } = Astro.props;
+const d = noticia.data;
+const t = textos();
+const cat = nomeCategoria(d.categoria);
+const dadosEstruturados = {
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  headline: d.titulo,
+  description: d.resumo,
+  datePublished: d.publicadoEm.toISOString(),
+  image: d.imagem ? [d.imagem] : undefined,
+  isBasedOn: d.fonte.url,
+};
+---
+<Base titulo={d.titulo} descricao={d.resumo} imagem={d.imagem} editoria={d.categoria} tipo="article">
+  <article class="materia">
+    <div class="foto-materia"><Foto src={d.imagem} rotulo={cat} ansioso /></div>
+    <div>
+      <div class="tags">
+        <a class="etiqueta" href={`/categoria/${d.categoria}/`}>{cat}</a>
+        {d.tags.map((tag) => <span class="etiqueta clara">{tag}</span>)}
+      </div>
+      <h1>{d.titulo}</h1>
+      <p class="resumo">{d.resumo}</p>
+      <div class="credito">
+        {t.fonte}: <b>{d.fonte.nome}</b> · {dataCompleta(d.publicadoEm)}{d.regiao && ` · ${d.regiao}`}<br />
+        {t.avisoIA} {t.foto}: {d.creditoImagem ?? d.fonte.nome}.
+      </div>
+      <div class="acoes">
+        <a class="botao cheio" href={d.fonte.url} target="_blank" rel="noopener">{t.lerNaFonte}</a>
+        <button class="botao" data-compartilhar>{t.compartilhar}</button>
+        <a class="botao" href="/">{t.voltarInicio}</a>
+      </div>
+    </div>
+  </article>
+  {relacionadas.length > 0 && (
+    <section class="feed">
+      <div class="rotulo-secao"><h2>{t.relacionadas}</h2></div>
+      <Grade noticias={relacionadas} />
+    </section>
+  )}
+  <script type="application/ld+json" set:html={JSON.stringify(dadosEstruturados)} />
+  <JanelaNoticia slot="depois" noticias={relacionadas} />
+</Base>

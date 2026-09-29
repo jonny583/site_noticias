@@ -1,0 +1,144 @@
+// Comportamentos da página no navegador: tema, datas, carrossel, janela da notícia.
+
+const $ = <T extends Element = HTMLElement>(s: string, raiz: ParentNode = document) => raiz.querySelector<T>(s);
+const $$ = <T extends Element = HTMLElement>(s: string, raiz: ParentNode = document) => [...raiz.querySelectorAll<T>(s)];
+const semMovimento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------- Tema claro/escuro ----------
+$("#tema")?.addEventListener("click", () => {
+  const raiz = document.documentElement;
+  const escuro = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  raiz.dataset.theme = escuro ? "light" : "dark";
+  try { localStorage.setItem("tema", raiz.dataset.theme); } catch {}
+});
+
+// ---------- Datas relativas ("há 2 h"), calculadas na hora da visita ----------
+function relativa(d: Date) {
+  const horas = Math.floor((Date.now() - d.getTime()) / 3.6e6);
+  if (horas < 1) return "agora";
+  if (horas < 24) return `há ${horas} h`;
+  if (horas < 48) return "ontem";
+  return null; // mantém a data escrita
+}
+$$<HTMLTimeElement>("time[data-relativo]").forEach((el) => {
+  const r = relativa(new Date(el.dateTime));
+  if (r) el.textContent = r;
+});
+
+// ---------- Carrossel de destaques ----------
+$$("[data-carrossel]").forEach((sec) => {
+  const trilho = $("[data-trilho]", sec)!;
+  const slides = $$(".slide", trilho);
+  const pontos = $$("button", $("[data-pontos]", sec)!);
+  if (slides.length < 2) { $(".setas", sec)?.remove(); $("[data-pontos]", sec)?.remove(); return; }
+  const passo = () => slides[0].getBoundingClientRect().width + 16;
+  const atual = () => Math.round(trilho.scrollLeft / passo());
+  const irPara = (i: number) => {
+    const n = slides.length;
+    trilho.scrollTo({ left: (((i % n) + n) % n) * passo(), behavior: semMovimento ? "auto" : "smooth" });
+  };
+  const marcar = () => pontos.forEach((b, i) => b.setAttribute("aria-current", String(i === atual())));
+  trilho.addEventListener("scroll", () => requestAnimationFrame(marcar), { passive: true });
+  $("[data-ant]", sec)!.addEventListener("click", () => irPara(atual() - 1));
+  $("[data-prox]", sec)!.addEventListener("click", () => irPara(atual() + 1));
+  pontos.forEach((b, i) => b.addEventListener("click", () => irPara(i)));
+  marcar();
+
+  let pausa = false;
+  ["mouseenter", "touchstart", "focusin"].forEach((ev) => trilho.addEventListener(ev, () => (pausa = true), { passive: true }));
+  ["mouseleave", "focusout"].forEach((ev) => trilho.addEventListener(ev, () => (pausa = false)));
+  if (!semMovimento) setInterval(() => { if (!pausa && !document.hidden) irPara(atual() + 1); }, 6000);
+});
+
+// ---------- Janela da notícia ----------
+type DadosJanela = {
+  id: string; titulo: string; resumo: string; categoria: string; tags: string[];
+  fonte: { nome: string; url: string }; data: string; regiao: string; imagem: string; creditoImagem: string;
+};
+const modal = $("#modal");
+const dadosEl = $("#dados-noticias");
+if (modal && dadosEl) {
+  const dados: Record<string, DadosJanela> = JSON.parse(dadosEl.textContent || "{}");
+  const rotulos = JSON.parse($("#rotulos-janela")?.textContent || "{}");
+  const urlInicial = location.pathname;
+  let ultimoFoco: HTMLElement | null = null;
+  let empurrou = false;
+
+  const txt = (el: HTMLElement | null, v: string) => { if (el) el.textContent = v; };
+  const etiqueta = (t: string, clara = false) => {
+    const s = document.createElement("span");
+    s.className = clara ? "etiqueta clara" : "etiqueta";
+    s.textContent = t;
+    return s;
+  };
+
+  function abrir(id: string, empurrar = true) {
+    const n = dados[id];
+    if (!n) return false;
+    ultimoFoco = document.activeElement as HTMLElement;
+    const img = $<HTMLImageElement>("#m-img")!;
+    img.classList.remove("quebrada");
+    img.onerror = () => img.classList.add("quebrada");
+    if (n.imagem) { img.src = n.imagem; img.hidden = false; } else { img.removeAttribute("src"); img.hidden = true; }
+    txt($("#m-rotulo"), n.categoria);
+    $("#m-tags")!.replaceChildren(etiqueta(n.categoria), ...n.tags.map((t) => etiqueta(t, true)));
+    txt($("#m-titulo"), n.titulo);
+    txt($("#m-resumo"), n.resumo);
+    const cred = $("#m-credito")!;
+    cred.replaceChildren();
+    const b = document.createElement("b");
+    b.textContent = n.fonte.nome;
+    cred.append(`${rotulos.fonte}: `, b, ` · ${n.data}${n.regiao ? " · " + n.regiao : ""}`, document.createElement("br"),
+      `${rotulos.avisoIA} ${rotulos.foto}: ${n.creditoImagem}.`);
+    $<HTMLAnchorElement>("#m-fonte")!.href = n.fonte.url;
+    modal!.classList.add("aberto");
+    document.body.classList.add("travado");
+    $<HTMLButtonElement>(".fechar", modal!)!.focus();
+    if (empurrar) { history.pushState({ janela: id }, "", `/noticia/${id}/`); empurrou = true; }
+    return true;
+  }
+
+  function fechar(voltarHistorico = true) {
+    if (!modal!.classList.contains("aberto")) return;
+    modal!.classList.remove("aberto");
+    document.body.classList.remove("travado");
+    if (voltarHistorico && empurrou) { empurrou = false; history.back(); }
+    ultimoFoco?.focus();
+  }
+
+  document.addEventListener("click", (e) => {
+    const alvo = e.target as HTMLElement;
+    const a = alvo.closest<HTMLElement>("[data-abrir]");
+    if (a && !(e as MouseEvent).ctrlKey && !(e as MouseEvent).metaKey && !(e as MouseEvent).shiftKey) {
+      if (abrir(a.dataset.abrir!)) e.preventDefault();
+    }
+    if (alvo.closest("[data-fechar]")) fechar();
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") fechar(); });
+  addEventListener("popstate", () => {
+    const m = location.pathname.match(/^\/noticia\/([^/]+)\/?$/);
+    if (m && location.pathname !== urlInicial) { abrir(m[1], false); empurrou = false; }
+    else { empurrou = false; fechar(false); }
+  });
+}
+
+// ---------- Compartilhar ----------
+document.addEventListener("click", async (e) => {
+  const b = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-compartilhar]");
+  if (!b) return;
+  const titulo = $("#m-titulo")?.textContent || document.title;
+  const url = location.href;
+  try {
+    if (navigator.share) await navigator.share({ title: titulo, url });
+    else { await navigator.clipboard.writeText(url); b.textContent = b.dataset.copiado || "Link copiado ✓"; }
+  } catch {}
+});
+
+// ---------- Newsletter (modo demonstração enquanto não há serviço ligado) ----------
+$$<HTMLFormElement>("form[data-newsletter='demo']").forEach((f) =>
+  f.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const b = $("button", f);
+    if (b) b.textContent = f.dataset.ok || "✓";
+  })
+);

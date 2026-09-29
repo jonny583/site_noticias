@@ -1,0 +1,19 @@
+---
+import { CATEGORIAS } from "../lib/categorias";
+import { textos } from "../i18n";
+interface Props { atual?: string }
+const { atual = "tudo" } = Astro.props;
+const t = textos();
+const itens = [
+  { slug: "tudo", nome: t.tudo, href: "/" },
+  ...CATEGORIAS.map((c) => ({ slug: c, nome: t.categorias[c], href: `/categoria/${c}/` })),
+  { slug: "coluna", nome: t.coluna, href: "/coluna/" },
+];
+---
+<nav class="editorias" aria-label={t.editorias}>
+  <div class="envelope">
+    <ul>
+      {itens.map((i) => <li><a href={i.href} aria-current={i.slug === atual ? "page" : undefined}>{i.nome}</a></li>)}
+    </ul>
+  </div>
+</nav>

@@ -1,0 +1,20 @@
+---
+// Faixa de indicadores. Os valores ficam em src/data/indicadores.json
+// (o robô poderá atualizá-los automaticamente numa fase seguinte).
+import dados from "../data/indicadores.json";
+import { textos } from "../i18n";
+const t = textos();
+const classe = (x: string) => (x === "sobe" ? "sobe" : x === "desce" ? "desce" : "");
+const lista = dados.atualizadoEm
+  ? [...dados.itens, { nome: t.atualizadoEm, valor: dados.atualizadoEm, tendencia: "" }]
+  : dados.itens;
+---
+<div class="indicadores" aria-label={t.indicadoresRotulo}>
+  <div class="faixa">
+    {[0, 1].map((copia) =>
+      lista.map((i) => (
+        <span aria-hidden={copia ? "true" : undefined}>{i.nome} <b class={classe(i.tendencia)}>{i.valor}</b></span>
+      ))
+    )}
+  </div>
+</div>

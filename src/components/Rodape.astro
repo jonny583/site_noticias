@@ -1,0 +1,18 @@
+---
+import { SITE } from "../config.js";
+import { textos } from "../i18n";
+const t = textos();
+const remocao = `mailto:${SITE.emailContato}?subject=${encodeURIComponent("Pedido de remoção")}`;
+---
+<footer>
+  <div class="envelope">
+    <div>© {new Date().getFullYear()} {SITE.nome} · {t.iniciativa} Archilly. {t.rodape}</div>
+    <nav>
+      <a href="/sobre/">{t.sobre}</a>
+      <a href="/politica-de-conteudo/">{t.politica}</a>
+      <a href={remocao}>{t.remocao}</a>
+      <a href="/arquivo/">{t.arquivo}</a>
+      <a href="/rss.xml">RSS</a>
+    </nav>
+  </div>
+</footer>

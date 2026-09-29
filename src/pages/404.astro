@@ -1,0 +1,12 @@
+---
+import Base from "../layouts/Base.astro";
+import { textos } from "../i18n";
+const t = textos();
+---
+<Base titulo={t.naoEncontrada}>
+  <div class="titulo-pagina">
+    <span class="etiqueta">404</span>
+    <h1>{t.naoEncontrada}</h1>
+    <p><a class="botao" href="/">{t.voltarInicio}</a></p>
+  </div>
+</Base>

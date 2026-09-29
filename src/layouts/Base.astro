@@ -1,0 +1,58 @@
+---
+import "../styles/global.css";
+import Cabecalho from "../components/Cabecalho.astro";
+import Editorias from "../components/Editorias.astro";
+import Rodape from "../components/Rodape.astro";
+import { SITE } from "../config.js";
+import { textos, IDIOMA_PADRAO } from "../i18n";
+
+interface Props {
+  titulo?: string;
+  descricao?: string;
+  imagem?: string;
+  editoria?: string;
+  compacto?: boolean;
+  tipo?: "website" | "article";
+}
+const { titulo, descricao = textos().lema, imagem, editoria, compacto = true, tipo = "website" } = Astro.props;
+const tituloCompleto = titulo ? `${titulo} — ${SITE.nome}` : `${SITE.nome} — ${textos().lema.split(" — ")[0]}`;
+const canonico = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang={IDIOMA_PADRAO === "pt" ? "pt-BR" : IDIOMA_PADRAO}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descricao} />
+    <link rel="canonical" href={canonico} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.nome} href="/rss.xml" />
+    <meta property="og:site_name" content={SITE.nome} />
+    <meta property="og:type" content={tipo} />
+    <meta property="og:title" content={titulo ?? SITE.nome} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:url" content={canonico} />
+    {imagem && <meta property="og:image" content={imagem} />}
+    <meta name="twitter:card" content={imagem ? "summary_large_image" : "summary"} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+    <script is:inline>
+      try { const t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <Cabecalho compacto={compacto} />
+    <Editorias atual={editoria} />
+    <slot name="antes" />
+    <main class="envelope">
+      <slot />
+    </main>
+    <Rodape />
+    <slot name="depois" />
+    <script>
+      import "../scripts/app.ts";
+    </script>
+  </body>
+</html>

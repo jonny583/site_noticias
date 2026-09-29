@@ -1,0 +1,35 @@
+---
+import Foto from "./Foto.astro";
+import { nomeCategoria, type Noticia } from "../lib/conteudo";
+import { textos } from "../i18n";
+interface Props { noticias: Noticia[] }
+const { noticias } = Astro.props;
+const t = textos();
+---
+{noticias.length > 0 && (
+  <section class="destaques" aria-label={t.emDestaque} data-carrossel>
+    <div class="rotulo-secao">
+      <h2>{t.emDestaque}</h2>
+      <div class="setas">
+        <button class="botao botao-icone" data-ant aria-label={t.anterior}>←</button>
+        <button class="botao botao-icone" data-prox aria-label={t.proximo}>→</button>
+      </div>
+    </div>
+    <div class="trilho" data-trilho>
+      {noticias.map((n, i) => (
+        <a class="slide" href={`/noticia/${n.id}/`} data-abrir={n.id}>
+          <Foto src={n.data.imagem} rotulo={nomeCategoria(n.data.categoria)} ansioso={i === 0} />
+          <div class="veu"></div>
+          <div class="texto">
+            <span class="etiqueta">{nomeCategoria(n.data.categoria)}</span>
+            <h3>{n.data.titulo}</h3>
+            <p>{n.data.resumo}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+    <div class="pontos" data-pontos>
+      {noticias.map((_, i) => <button aria-label={`${i + 1}`} data-i={i}></button>)}
+    </div>
+  </section>
+)}

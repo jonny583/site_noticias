@@ -1,0 +1,23 @@
+---
+// Grade de posts. Intercala um card Archilly a cada N notícias.
+import CardNoticia from "./CardNoticia.astro";
+import CardArchilly from "./CardArchilly.astro";
+import type { Noticia, CardArchilly as TCard } from "../lib/conteudo";
+import { SITE } from "../config.js";
+import { textos } from "../i18n";
+interface Props { noticias: Noticia[]; cards?: TCard[] }
+const { noticias, cards = [] } = Astro.props;
+const a = SITE.archillyACada;
+const itens: ({ tipo: "n"; n: Noticia } | { tipo: "a"; c: TCard })[] = [];
+noticias.forEach((n, i) => {
+  itens.push({ tipo: "n", n });
+  if (cards.length && (i + 1) % a === 0) itens.push({ tipo: "a", c: cards[Math.floor(i / a) % cards.length] });
+});
+---
+{noticias.length ? (
+  <div class="grade">
+    {itens.map((it) => (it.tipo === "n" ? <CardNoticia noticia={it.n} /> : <CardArchilly card={it.c} />))}
+  </div>
+) : (
+  <p class="vazio">{textos().nenhuma}</p>
+)}
