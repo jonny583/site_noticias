@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar Incorpora — protótipo</title>
+<meta name="description" content="O radar contemporâneo da incorporação: loteamentos, condomínios, edifícios, mercado e projetos pelo mundo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --papel: #F5F3EE;
+    --papel-2: #ECE8DF;
+    --tinta: #121212;
+    --tinta-2: #4A4A48;
+    --linha: #D9D4C8;
+    --acento: #2B4DFF;
+    --acento-tinta: #FFFFFF;
+    --archilly: #0F2A24;
+    --archilly-claro: #C8F25A;
+    --card: #FFFFFF;
+    --sombra: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+    --serifa: "Fraunces", Georgia, serif;
+    --sans: "Inter", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papel: #111210; --papel-2: #1A1B18; --tinta: #F1EEE6; --tinta-2: #A9A69E;
+      --linha: #2C2D29; --acento: #6F86FF; --card: #181916; --archilly: #16352E;
+      --sombra: 0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --papel: #111210; --papel-2: #1A1B18; --tinta: #F1EEE6; --tinta-2: #A9A69E;
+    --linha: #2C2D29; --acento: #6F86FF; --card: #181916; --archilly: #16352E;
+    --sombra: 0 1px 2px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--papel); color: var(--tinta); font: 16px/1.55 var(--sans); }
+  body.travado { overflow: hidden; }
+  a { color: inherit; }
+  img { display: block; max-width: 100%; }
+  .envelope { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+  @media (min-width: 720px) { .envelope { padding: 0 32px; } }
+
+  /* Aviso de protótipo */
+  .aviso { background: var(--tinta); color: var(--papel); font: 500 12px/1 var(--mono); text-align: center; padding: 8px 16px; letter-spacing: .02em; }
+
+  /* Barra superior */
+  .topo { border-bottom: 1px solid var(--linha); font-size: 13px; color: var(--tinta-2); }
+  .topo .envelope { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 44px; }
+  .selo { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: var(--tinta); font-weight: 500; }
+  .selo i { width: 18px; height: 18px; border-radius: 5px; background: var(--archilly); position: relative; }
+  .selo i::after { content: ""; position: absolute; inset: 5px; border-radius: 2px; background: var(--archilly-claro); }
+  .topo-acoes { display: flex; gap: 8px; align-items: center; }
+  .botao { font: 600 13px/1 var(--sans); border: 1px solid var(--tinta); background: transparent; color: var(--tinta); border-radius: 999px; padding: 9px 14px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+  .botao.cheio { background: var(--tinta); color: var(--papel); }
+  .botao-icone { width: 34px; height: 34px; padding: 0; display: grid; place-items: center; }
+  .so-desktop { display: none; }
+  @media (min-width: 720px) { .so-desktop { display: inline; } }
+
+  /* Cabeçalho de jornal */
+  .cabecalho { text-align: center; padding: 28px 0 18px; border-bottom: 3px double var(--tinta); }
+  .cabecalho .data { font: 500 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-2); }
+  .marca { font-family: var(--serifa); font-weight: 800; font-size: clamp(40px, 9vw, 96px); line-height: .95; letter-spacing: -.035em; margin: 12px 0 10px; }
+  .marca span { color: var(--acento); }
+  .lema { margin: 0; color: var(--tinta-2); font-size: 15px; }
+
+  /* Editorias */
+  .editorias { border-bottom: 1px solid var(--linha); position: sticky; top: 0; z-index: 20; background: var(--papel); }
+  .editorias ul { list-style: none; display: flex; gap: 4px; margin: 0; padding: 10px 0; overflow-x: auto; scrollbar-width: none; }
+  .editorias ul::-webkit-scrollbar { display: none; }
+  .editorias button { font: 500 14px/1 var(--sans); background: none; border: 0; color: var(--tinta-2); padding: 9px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .editorias button:hover { color: var(--tinta); background: var(--papel-2); }
+  .editorias button[aria-pressed="true"] { background: var(--tinta); color: var(--papel); }
+
+  /* Indicadores */
+  .indicadores { border-bottom: 1px solid var(--linha); overflow: hidden; font: 500 12px/1 var(--mono); color: var(--tinta-2); }
+  .indicadores .faixa { display: flex; gap: 36px; padding: 10px 0; white-space: nowrap; animation: correr 40s linear infinite; width: max-content; }
+  .indicadores b { color: var(--tinta); font-weight: 500; }
+  .sobe { color: #1E9E5A; } .desce { color: #D0453A; }
+  @keyframes correr { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .indicadores .faixa { animation: none; } }
+
+  /* Carrossel de destaques */
+  .destaques { padding: 28px 0 8px; }
+  .rotulo-secao { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .rotulo-secao h2 { font: 700 13px/1 var(--mono); text-transform: uppercase; letter-spacing: .1em; margin: 0; }
+  .setas { display: flex; gap: 8px; }
+  .trilho { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 14px; }
+  .trilho::-webkit-scrollbar { display: none; }
+  .slide { flex: 0 0 100%; scroll-snap-align: start; position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 4/5; background: var(--papel-2); cursor: pointer; border: 0; padding: 0; text-align: left; color: #fff; }
+  @media (min-width: 720px) { .slide { aspect-ratio: 21/9; } }
+  .slide img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+  .slide:hover img { transform: scale(1.03); }
+  .slide .veu { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.78)); }
+  .slide .texto { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px; max-width: 820px; }
+  @media (min-width: 720px) { .slide .texto { padding: 36px; } }
+  .slide h3 { font: 700 clamp(24px, 3.6vw, 42px)/1.08 var(--serifa); letter-spacing: -.02em; margin: 10px 0 8px; }
+  .slide p { margin: 0; font-size: 15px; opacity: .88; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .pontos { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
+  .pontos button { width: 7px; height: 7px; border-radius: 99px; border: 0; padding: 0; background: var(--linha); cursor: pointer; transition: width .25s; }
+  .pontos button[aria-current="true"] { width: 22px; background: var(--tinta); }
+
+  .etiqueta { display: inline-block; font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; padding: 5px 8px; border-radius: 4px; background: var(--acento); color: var(--acento-tinta); }
+  .etiqueta.clara { background: var(--papel-2); color: var(--tinta); }
+
+  /* Grade de posts */
+  .feed { padding: 28px 0 8px; }
+  .grade { display: grid; gap: 20px; grid-template-columns: 1fr; }
+  @media (min-width: 560px) { .grade { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 900px) { .grade { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1180px) { .grade { grid-template-columns: repeat(4, 1fr); } }
+  .post { background: var(--card); border-radius: 14px; overflow: hidden; box-shadow: var(--sombra); display: flex; flex-direction: column; }
+  .post .foto { position: relative; aspect-ratio: 1/1; background: var(--papel-2); overflow: hidden; }
+  .post .foto img { width: 100%; height: 100%; object-fit: cover; }
+  .post .foto .etiqueta { position: absolute; top: 12px; left: 12px; }
+  .post .corpo { padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .post h3 { font: 700 20px/1.18 var(--serifa); letter-spacing: -.01em; margin: 0; }
+  .post p { margin: 0; font-size: 14.5px; color: var(--tinta-2); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .post .rodape { margin-top: auto; padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--linha); }
+  .fonte { font: 500 11.5px/1.3 var(--mono); color: var(--tinta-2); }
+  .fonte b { color: var(--tinta); font-weight: 500; }
+  .mais { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 999px; border: 1px solid var(--tinta); background: transparent; color: var(--tinta); font: 400 22px/1 var(--sans); cursor: pointer; display: grid; place-items: center; transition: background .2s, color .2s, transform .2s; }
+  .mais:hover, .mais:focus-visible { background: var(--acento); border-color: var(--acento); color: #fff; transform: rotate(90deg); }
+
+  /* Card Archilly */
+  .post.archilly { background: var(--archilly); color: #F2F5EE; }
+  .post.archilly .etiqueta { background: var(--archilly-claro); color: var(--archilly); }
+  .post.archilly p { color: rgba(242,245,238,.78); }
+  .post.archilly .rodape { border-color: rgba(255,255,255,.15); }
+  .post.archilly .fonte, .post.archilly .fonte b { color: rgba(242,245,238,.8); }
+  .post.archilly .mais { border-color: var(--archilly-claro); color: var(--archilly-claro); }
+  .post.archilly .mais:hover { background: var(--archilly-claro); color: var(--archilly); }
+
+  /* Coluna */
+  .coluna { margin: 36px 0 8px; border-top: 3px double var(--tinta); border-bottom: 1px solid var(--linha); padding: 28px 0; display: grid; gap: 24px; }
+  @media (min-width: 900px) { .coluna { grid-template-columns: 260px 1fr; align-items: center; } }
+  .autor { display: flex; gap: 14px; align-items: center; }
+  .autor .avatar { width: 64px; height: 64px; border-radius: 999px; background: var(--papel-2); display: grid; place-items: center; font: 700 24px var(--serifa); border: 1px solid var(--linha); }
+  .autor small { display: block; font: 500 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-2); }
+  .autor strong { font: 700 18px var(--serifa); }
+  .coluna h3 { font: 700 clamp(26px, 3.2vw, 38px)/1.1 var(--serifa); letter-spacing: -.02em; margin: 8px 0 10px; }
+  .coluna p { margin: 0 0 14px; color: var(--tinta-2); max-width: 70ch; }
+
+  /* Newsletter */
+  .news { margin: 36px 0; background: var(--tinta); color: var(--papel); border-radius: 18px; padding: 28px 20px; display: grid; gap: 18px; }
+  @media (min-width: 900px) { .news { grid-template-columns: 1.2fr 1fr; align-items: center; padding: 40px; } }
+  .news h2 { font: 700 clamp(26px, 3vw, 36px)/1.1 var(--serifa); margin: 0 0 8px; letter-spacing: -.02em; }
+  .news p { margin: 0; opacity: .75; }
+  .news form { display: flex; flex-wrap: wrap; gap: 8px; }
+  .news input { flex: 1 1 200px; min-width: 0; font: 15px var(--sans); padding: 13px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: transparent; color: var(--papel); }
+  .news input::placeholder { color: rgba(255,255,255,.5); }
+  .news button { font: 600 15px var(--sans); padding: 13px 20px; border-radius: 999px; border: 0; background: var(--archilly-claro); color: var(--archilly); cursor: pointer; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .news { background: var(--papel-2); color: var(--tinta); } :root:not([data-theme="light"]) .news input { color: var(--tinta); } }
+  :root[data-theme="dark"] .news { background: var(--papel-2); color: var(--tinta); }
+  :root[data-theme="dark"] .news input { color: var(--tinta); }
+
+  footer { border-top: 1px solid var(--linha); padding: 28px 0 40px; color: var(--tinta-2); font-size: 13.5px; }
+  footer .envelope { display: grid; gap: 14px; }
+  @media (min-width: 720px) { footer .envelope { grid-template-columns: 1fr auto; align-items: center; } }
+  footer nav { display: flex; flex-wrap: wrap; gap: 16px; }
+
+  /* Janela da notícia (modal) */
+  .modal { position: fixed; inset: 0; z-index: 50; display: none; }
+  .modal.aberto { display: block; }
+  .modal .fundo { position: absolute; inset: 0; background: rgba(10,10,10,.55); backdrop-filter: blur(4px); animation: aparecer .2s ease; }
+  .modal .janela { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(980px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto; background: var(--card); border-radius: 18px; box-shadow: 0 24px 80px rgba(0,0,0,.35); display: grid; animation: subir .25s ease; }
+  @media (min-width: 860px) { .modal .janela { grid-template-columns: 1fr 1fr; overflow: hidden; } }
+  .modal .janela > img { width: 100%; aspect-ratio: 1/1; object-fit: cover; }
+  @media (min-width: 860px) { .modal .janela > img { height: 100%; } }
+  .modal .conteudo { padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  @media (min-width: 860px) { .modal .conteudo { padding: 36px; overflow: auto; max-height: calc(100vh - 24px); } }
+  .modal h2 { font: 700 clamp(26px, 3vw, 34px)/1.1 var(--serifa); letter-spacing: -.02em; margin: 0; }
+  .modal .resumo { margin: 0; font-size: 16.5px; line-height: 1.65; }
+  .modal .credito { font: 500 12px/1.5 var(--mono); color: var(--tinta-2); border-top: 1px solid var(--linha); padding-top: 12px; }
+  .modal .acoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+  .fechar { position: absolute; top: 12px; right: 12px; z-index: 2; width: 40px; height: 40px; border-radius: 999px; border: 0; background: rgba(255,255,255,.92); color: #111; font-size: 22px; cursor: pointer; box-shadow: var(--sombra); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  @keyframes aparecer { from { opacity: 0; } }
+  @keyframes subir { from { opacity: 0; transform: translate(-50%, -46%); } }
+  @media (prefers-reduced-motion: reduce) { .modal .fundo, .modal .janela { animation: none; } }
+
+  :focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+  .vazio { color: var(--tinta-2); padding: 40px 0; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="aviso">PROTÓTIPO VISUAL · notícias, fotos e números fictícios</div>
+
+<div class="topo">
+  <div class="envelope">
+    <a class="selo" href="#" title="Conheça a Archilly"><i aria-hidden="true"></i><span>uma iniciativa <b>Archilly</b></span></a>
+    <div class="topo-acoes">
+      <a class="botao cheio" href="#newsletter">Receber <span class="so-desktop">a newsletter</span></a>
+      <button class="botao botao-icone" id="tema" aria-label="Alternar modo claro/escuro">◐</button>
+    </div>
+  </div>
+</div>
+
+<header class="cabecalho">
+  <div class="envelope">
+    <div class="data" id="hoje"></div>
+    <h1 class="marca">Radar<span>.</span>Incorpora</h1>
+    <p class="lema">O radar contemporâneo da incorporação — loteamentos, condomínios e o mercado, no Brasil e no mundo.</p>
+  </div>
+</header>
+
+<nav class="editorias" aria-label="Editorias">
+  <div class="envelope"><ul id="editorias"></ul></div>
+</nav>
+
+<div class="indicadores" aria-label="Indicadores do mercado (ilustrativos)">
+  <div class="faixa" id="faixa"></div>
+</div>
+
+<main class="envelope">
+  <section class="destaques" aria-label="Destaques">
+    <div class="rotulo-secao">
+      <h2>Em destaque</h2>
+      <div class="setas">
+        <button class="botao botao-icone" id="ant" aria-label="Destaque anterior">←</button>
+        <button class="botao botao-icone" id="prox" aria-label="Próximo destaque">→</button>
+      </div>
+    </div>
+    <div class="trilho" id="trilho"></div>
+    <div class="pontos" id="pontos"></div>
+  </section>
+
+  <section class="feed" aria-label="Últimas notícias">
+    <div class="rotulo-secao"><h2 id="titulo-feed">Últimas</h2><span class="fonte" id="contador"></span></div>
+    <div class="grade" id="grade"></div>
+  </section>
+
+  <section class="coluna" aria-label="Coluna">
+    <div class="autor">
+      <div class="avatar">J</div>
+      <div><small>Coluna</small><strong>Nome do colunista</strong></div>
+    </div>
+    <div>
+      <span class="etiqueta clara">Coluna · autoral</span>
+      <h3>Por que o loteamento planejado virou o produto mais inteligente da década</h3>
+      <p>Texto importado automaticamente do seu blog pessoal. Aqui aparece o início do post mais recente, com um convite para ler a coluna completa. Em breve, a coluna ganha página própria com todo o arquivo.</p>
+      <a class="botao" href="#">Ler a coluna</a>
+    </div>
+  </section>
+
+  <section class="news" id="newsletter">
+    <div>
+      <h2>O setor inteiro, uma vez por semana.</h2>
+      <p>As notícias que importam para incorporadores e loteadores, resumidas e com fonte — toda segunda de manhã.</p>
+    </div>
+    <form onsubmit="event.preventDefault(); this.querySelector('button').textContent='Inscrito ✓';">
+      <input type="email" required placeholder="seu@email.com.br" aria-label="Seu e-mail">
+      <button type="submit">Quero receber</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <div class="envelope">
+    <div>© 2026 Radar Incorpora · uma iniciativa Archilly. Notícias resumidas por IA a partir das fontes citadas.</div>
+    <nav><a href="#">Sobre</a><a href="#">Política de conteúdo</a><a href="#">Pedir remoção</a><a href="#">RSS</a></nav>
+  </div>
+</footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-titulo">
+  <div class="fundo" data-fechar></div>
+  <article class="janela">
+    <button class="fechar" data-fechar aria-label="Fechar">×</button>
+    <img id="m-img" alt="">
+    <div class="conteudo">
+      <div class="tags" id="m-tags"></div>
+      <h2 id="m-titulo"></h2>
+      <p class="resumo" id="m-resumo"></p>
+      <div class="credito" id="m-credito"></div>
+      <div class="acoes">
+        <a class="botao cheio" id="m-fonte" href="#" target="_blank" rel="noopener">Ler na fonte ↗</a>
+        <button class="botao" id="m-compartilhar">Compartilhar</button>
+      </div>
+    </div>
+  </article>
+</div>
+
+<script>
+const EDITORIAS = ["Tudo", "Loteamentos", "Condomínios", "Edifícios", "Mercado & Economia", "Mundo & Projetos", "Inovação", "Legislação"];
+
+const img = (seed, w = 900, h = 900) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
+
+// Dados fictícios — no site real, cada item vira um arquivo gerado pelo robô.
+const NOTICIAS = [
+  { id: "bairro-planejado-interior-sp", cat: "Loteamentos", destaque: true, titulo: "Bairro planejado de 2 milhões de m² é lançado no interior paulista", resumo: "Um novo bairro planejado com lotes residenciais e comerciais, parque linear e centro de serviços foi anunciado no interior de São Paulo. O projeto prevê implantação em quatro fases ao longo de oito anos e aposta em infraestrutura entregue antes das vendas, tendência que vem ganhando força entre loteadoras de médio porte.", fonte: "Portal do Setor", data: "há 2 h", regiao: "Brasil · SP", tags: ["bairro planejado", "lançamento"] },
+  { id: "selic-credito-imobiliario", cat: "Mercado & Economia", destaque: true, titulo: "Crédito imobiliário reage e incorporadoras revisam guias de lançamento", resumo: "Com sinais de estabilidade nos juros, bancos ampliaram a oferta de financiamento e grandes incorporadoras sinalizaram revisão para cima de suas projeções de lançamentos. Analistas apontam o médio padrão e os loteamentos como segmentos mais sensíveis à melhora das condições de crédito.", fonte: "Jornal Econômico", data: "há 3 h", regiao: "Brasil", tags: ["crédito", "juros"] },
+  { id: "dubai-torre-madeira", cat: "Mundo & Projetos", destaque: true, titulo: "Dubai aprova torre residencial em madeira engenheirada de 40 andares", resumo: "O projeto combina estrutura híbrida de concreto e madeira laminada cruzada e promete reduzir em até 40% a pegada de carbono da obra. Se concluído, será um dos edifícios em madeira mais altos do mundo e um marco para a construção industrializada em climas extremos.", fonte: "Revista de Arquitetura", data: "há 5 h", regiao: "Emirados Árabes", tags: ["madeira", "sustentabilidade"] },
+  { id: "condominio-clube-sul", cat: "Condomínios", destaque: true, titulo: "Condomínio-clube horizontal esgota primeira fase em 72 horas no Sul", resumo: "O empreendimento de casas em condomínio fechado, com lotes a partir de 450 m² e clube de 8 mil m², vendeu toda a primeira fase em três dias. A incorporadora atribui o resultado à campanha digital segmentada e à apresentação do masterplan em 3D interativo.", fonte: "Diário Imobiliário", data: "há 6 h", regiao: "Brasil · SC", tags: ["condomínio fechado", "vendas"] },
+  { id: "lei-reurb-atualizacao", cat: "Legislação", titulo: "Mudanças na regularização fundiária entram em consulta pública", resumo: "Proposta de atualização das regras de regularização urbana busca simplificar a aprovação de loteamentos consolidados e padronizar exigências entre municípios. Entidades do setor devem enviar contribuições nas próximas semanas.", fonte: "Agência de Notícias", data: "há 7 h", regiao: "Brasil", tags: ["Reurb", "aprovação"] },
+  { id: "ia-aprovacao-projetos", cat: "Inovação", titulo: "Prefeituras testam IA para acelerar análise de projetos urbanísticos", resumo: "Ferramentas de inteligência artificial passaram a verificar automaticamente parâmetros como recuos, áreas públicas e sistema viário em pedidos de aprovação. A expectativa é reduzir de meses para semanas o prazo de análise de loteamentos.", fonte: "Tech & Cidades", data: "há 8 h", regiao: "Brasil", tags: ["IA", "prefeituras"] },
+  { id: "edificio-retrofit-centro", cat: "Edifícios", titulo: "Retrofit transforma prédio comercial vazio em 180 apartamentos compactos", resumo: "Um edifício corporativo desocupado no centro de uma capital será convertido em residencial, com fachada preservada e áreas comuns no terraço. O modelo de retrofit ganha espaço com incentivos municipais para requalificação de áreas centrais.", fonte: "Folha do Mercado", data: "há 9 h", regiao: "Brasil · RJ", tags: ["retrofit", "centro"] },
+  { id: "incc-setembro", cat: "Mercado & Economia", titulo: "Custo da construção desacelera e dá fôlego às margens", resumo: "O índice que mede o custo da construção registrou alta menor no mês, puxado pela estabilidade dos materiais. Incorporadoras veem espaço para recompor margens em obras já contratadas, embora a mão de obra siga pressionada.", fonte: "Instituto de Pesquisa", data: "ontem", regiao: "Brasil", tags: ["INCC", "custos"] },
+  { id: "japao-cidade-inteligente", cat: "Mundo & Projetos", titulo: "Japão inaugura primeira fase de cidade-laboratório movida a hidrogênio", resumo: "O bairro experimental reúne moradias, veículos autônomos e redes de energia integradas. Os primeiros moradores serão pesquisadores e famílias voluntárias, que ajudarão a testar soluções que depois devem ser replicadas em outras cidades.", fonte: "Global Urban Review", data: "ontem", regiao: "Japão", tags: ["smart city", "energia"] },
+  { id: "loteamento-aberto-nordeste", cat: "Loteamentos", titulo: "Loteamentos abertos crescem no Nordeste com lotes de entrada acessível", resumo: "Levantamento regional aponta aumento de lançamentos de loteamentos abertos voltados ao primeiro imóvel, com parcelamento direto com a loteadora. O movimento acompanha a expansão de polos logísticos e industriais em cidades médias.", fonte: "Nordeste Negócios", data: "ontem", regiao: "Brasil · NE", tags: ["loteamento aberto", "cidades médias"] },
+  { id: "condominio-energia-solar", cat: "Condomínios", titulo: "Condomínios horizontais adotam usinas solares compartilhadas", resumo: "Novos empreendimentos passaram a incluir geração solar coletiva já no projeto, reduzindo a taxa condominial e virando argumento de venda. O modelo exige planejamento da área técnica ainda na fase de parcelamento.", fonte: "Energia & Imóveis", data: "ontem", regiao: "Brasil · GO", tags: ["solar", "condomínio"] },
+  { id: "fii-desenvolvimento", cat: "Mercado & Economia", titulo: "Fundos imobiliários de desenvolvimento voltam a captar", resumo: "Após um período de baixa, fundos voltados ao financiamento de novos empreendimentos retomaram emissões. Gestores enxergam oportunidade em loteamentos e residenciais horizontais, com prazos de retorno mais curtos que os verticais.", fonte: "Investidor Hoje", data: "há 2 dias", regiao: "Brasil", tags: ["FII", "funding"] },
+  { id: "copenhague-bairro-agua", cat: "Mundo & Projetos", titulo: "Copenhague aprova bairro sobre ilhas artificiais com ruas sem carros", resumo: "O plano urbano prevê moradias, escolas e parques em ilhas conectadas por pontes para pedestres e ciclistas. O projeto também funciona como proteção costeira contra a elevação do nível do mar.", fonte: "Nordic Design", data: "há 2 dias", regiao: "Dinamarca", tags: ["urbanismo", "clima"] },
+  { id: "gemeo-digital-obras", cat: "Inovação", titulo: "Gêmeos digitais chegam às obras de infraestrutura de loteamentos", resumo: "Incorporadoras começam a usar modelos digitais atualizados por drones para acompanhar terraplenagem, drenagem e pavimentação em tempo real. A tecnologia ajuda a antecipar desvios de custo e prazo.", fonte: "Construção Digital", data: "há 2 dias", regiao: "Brasil", tags: ["drones", "BIM"] },
+];
+
+const ARCHILLY = [
+  { titulo: "Do terreno ao masterplan em dias, não em meses", resumo: "Conheça como a Archilly ajuda incorporadores a estudar a viabilidade e desenhar loteamentos com inteligência — do primeiro traço ao projeto aprovado.", cta: "Conhecer a Archilly" },
+  { titulo: "Seu próximo loteamento começa com um estudo de massa", resumo: "Simule quadras, lotes e sistema viário, compare cenários e decida com números. Uma solução Archilly para quem pensa à frente.", cta: "Ver a solução" },
+];
+
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+// Data do dia, no estilo de jornal
+$("#hoje").textContent = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+// Tema claro/escuro
+$("#tema").addEventListener("click", () => {
+  const raiz = document.documentElement;
+  const escuroAgora = raiz.dataset.theme ? raiz.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  raiz.dataset.theme = escuroAgora ? "light" : "dark";
+});
+
+// Faixa de indicadores (ilustrativos)
+const IND = [["Selic", "—", ""], ["INCC-M (mês)", "+0,31%", "sobe"], ["IGP-M (12m)", "+3,2%", "sobe"], ["FipeZap venda", "+0,5%", "sobe"], ["Lançamentos (tri)", "−4,1%", "desce"], ["Dólar", "R$ —", ""]];
+const faixaHtml = IND.map(([n, v, c]) => `<span>${n} <b class="${c}">${v}</b></span>`).join("");
+$("#faixa").innerHTML = faixaHtml + faixaHtml;
+
+// Editorias (filtro)
+let filtro = "Tudo";
+$("#editorias").innerHTML = EDITORIAS.map((e) => `<li><button aria-pressed="${e === filtro}" data-cat="${esc(e)}">${esc(e)}</button></li>`).join("");
+$("#editorias").addEventListener("click", (ev) => {
+  const b = ev.target.closest("button"); if (!b) return;
+  filtro = b.dataset.cat;
+  document.querySelectorAll("#editorias button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  $("#titulo-feed").textContent = filtro === "Tudo" ? "Últimas" : filtro;
+  desenharGrade();
+  $(".feed").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+// Carrossel de destaques
+const destaques = NOTICIAS.filter((n) => n.destaque);
+$("#trilho").innerHTML = destaques.map((n) => `
+  <button class="slide" data-abrir="${n.id}" aria-label="Abrir: ${esc(n.titulo)}">
+    <img src="${img(n.id, 1600, 900)}" alt="" loading="lazy">
+    <div class="veu"></div>
+    <div class="texto">
+      <span class="etiqueta">${esc(n.cat)}</span>
+      <h3>${esc(n.titulo)}</h3>
+      <p>${esc(n.resumo)}</p>
+    </div>
+  </button>`).join("");
+$("#pontos").innerHTML = destaques.map((_, i) => `<button aria-label="Destaque ${i + 1}" data-i="${i}"></button>`).join("");
+
+const trilho = $("#trilho");
+const irPara = (i) => { const n = destaques.length; i = (i + n) % n; trilho.scrollTo({ left: i * (trilho.clientWidth + 16), behavior: "smooth" }); };
+const atual = () => Math.round(trilho.scrollLeft / (trilho.clientWidth + 16));
+const marcarPonto = () => document.querySelectorAll("#pontos button").forEach((b, i) => b.setAttribute("aria-current", i === atual()));
+trilho.addEventListener("scroll", () => requestAnimationFrame(marcarPonto));
+$("#ant").onclick = () => irPara(atual() - 1);
+$("#prox").onclick = () => irPara(atual() + 1);
+$("#pontos").onclick = (e) => { if (e.target.dataset.i) irPara(+e.target.dataset.i); };
+marcarPonto();
+// Troca automática a cada 6 s (pausa ao passar o mouse/tocar)
+let pausa = false;
+["mouseenter", "touchstart", "focusin"].forEach((ev) => trilho.addEventListener(ev, () => (pausa = true), { passive: true }));
+["mouseleave", "focusout"].forEach((ev) => trilho.addEventListener(ev, () => (pausa = false)));
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(() => { if (!pausa && !document.hidden) irPara(atual() + 1); }, 6000);
+
+// Grade de posts, com card Archilly a cada 6 notícias
+function cardNoticia(n) {
+  return `
+  <article class="post">
+    <div class="foto"><img src="${img(n.id)}" alt="" loading="lazy"><span class="etiqueta">${esc(n.cat)}</span></div>
+    <div class="corpo">
+      <h3>${esc(n.titulo)}</h3>
+      <p>${esc(n.resumo)}</p>
+      <div class="rodape">
+        <span class="fonte">via <b>${esc(n.fonte)}</b><br>${esc(n.data)} · ${esc(n.regiao)}</span>
+        <button class="mais" data-abrir="${n.id}" aria-label="Abrir notícia: ${esc(n.titulo)}">+</button>
+      </div>
+    </div>
+  </article>`;
+}
+function cardArchilly(a, i) {
+  return `
+  <article class="post archilly">
+    <div class="foto"><img src="${img("archilly-" + i)}" alt="" loading="lazy"><span class="etiqueta">Archilly</span></div>
+    <div class="corpo">
+      <h3>${esc(a.titulo)}</h3>
+      <p>${esc(a.resumo)}</p>
+      <div class="rodape">
+        <span class="fonte">Conteúdo <b>Archilly</b></span>
+        <a class="mais" href="#" aria-label="${esc(a.cta)}">→</a>
+      </div>
+    </div>
+  </article>`;
+}
+function desenharGrade() {
+  const lista = NOTICIAS.filter((n) => (filtro === "Tudo" ? !n.destaque : n.cat === filtro));
+  let html = "", k = 0;
+  lista.forEach((n, i) => {
+    html += cardNoticia(n);
+    if ((i + 1) % 6 === 0) html += cardArchilly(ARCHILLY[k++ % ARCHILLY.length], k);
+  });
+  $("#grade").innerHTML = html || `<p class="vazio">Nenhuma notícia nesta editoria ainda.</p>`;
+  $("#contador").textContent = `${lista.length} ${lista.length === 1 ? "notícia" : "notícias"}`;
+}
+desenharGrade();
+
+// Janela da notícia: abre por cima, muda o endereço e volta ao mesmo ponto ao fechar
+const modal = $("#modal");
+let ultimoFoco = null;
+function abrir(id, empurrar = true) {
+  const n = NOTICIAS.find((x) => x.id === id); if (!n) return;
+  ultimoFoco = document.activeElement;
+  $("#m-img").src = img(n.id, 1000, 1000);
+  $("#m-tags").innerHTML = `<span class="etiqueta">${esc(n.cat)}</span>` + n.tags.map((t) => `<span class="etiqueta clara">${esc(t)}</span>`).join("");
+  $("#m-titulo").textContent = n.titulo;
+  $("#m-resumo").textContent = n.resumo;
+  $("#m-credito").innerHTML = `Fonte: <b>${esc(n.fonte)}</b> · ${esc(n.data)} · ${esc(n.regiao)}<br>Resumo produzido por IA a partir da matéria original. Foto: divulgação/${esc(n.fonte)}.`;
+  modal.classList.add("aberto");
+  document.body.classList.add("travado");
+  modal.querySelector(".fechar").focus();
+  if (empurrar) history.pushState({ id }, "", "#noticia/" + id);
+}
+function fechar(voltar = true) {
+  if (!modal.classList.contains("aberto")) return;
+  modal.classList.remove("aberto");
+  document.body.classList.remove("travado");
+  if (voltar && location.hash.startsWith("#noticia/")) history.back();
+  ultimoFoco && ultimoFoco.focus();
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("[data-abrir]"); if (a) abrir(a.dataset.abrir);
+  if (e.target.closest("[data-fechar]")) fechar();
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") fechar(); });
+addEventListener("popstate", () => {
+  const m = location.hash.match(/^#noticia\/(.+)/);
+  m ? abrir(m[1], false) : fechar(false);
+});
+$("#m-compartilhar").onclick = async () => {
+  const dados = { title: $("#m-titulo").textContent, url: location.href };
+  try { navigator.share ? await navigator.share(dados) : (await navigator.clipboard.writeText(dados.url), ($("#m-compartilhar").textContent = "Link copiado ✓")); } catch {}
+};
+// Abrir direto por link (ex.: alguém recebeu o link da notícia)
+const inicial = location.hash.match(/^#noticia\/(.+)/);
+if (inicial) abrir(inicial[1], false);
+</script>
+</body>
+</html>

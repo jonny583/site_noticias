@@ -1,0 +1,7 @@
+desktop.ini
+**/desktop.ini
+node_modules/
+dist/
+.astro/
+.env
+.env.*
