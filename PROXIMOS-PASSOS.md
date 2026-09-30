@@ -56,7 +56,7 @@ Para retomar com o Claude, diga: **"vamos continuar o site de notícias"**.
 > Se preferir outro jeito (plugin de webhook, por exemplo), fica à vontade: o que importa é um POST nessa URL quando um post publicado mudar. Valeu!
 
 ## 5. Newsletter
-- [ ] Criar a conta num serviço gratuito (Brevo ou Buttondown) e ligar o formulário do site.
+- [ ] Criar a conta no MailerLite, com dois grupos ("Semanal" e "Mensal"), e ligar o formulário do site (as caixinhas semanal e mensal já estão prontas).
 - [ ] Depois, o resumo semanal com as melhores notícias e um destaque Archilly, montado automaticamente.
 
 ## 6. Acabamento e divulgação
