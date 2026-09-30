@@ -1,22 +1,37 @@
 ---
-import type { Coluna } from "../lib/conteudo";
+// Coluna na capa: os posts mais recentes do blog, em cartões verticais (como no blog).
+import type { PostBlog } from "../lib/blog";
 import { SITE } from "../config.js";
-import { textos } from "../i18n";
-interface Props { post?: Coluna }
-const { post } = Astro.props;
+import { localeData, textos } from "../i18n";
+interface Props { posts: PostBlog[] }
+const { posts } = Astro.props;
 const t = textos();
+const externo = (link: string) => link.startsWith("http");
 ---
-{post && (
+{posts.length > 0 && (
   <section class="coluna" aria-label={t.coluna}>
-    <div class="autor">
-      <div class="avatar">{SITE.colunista.charAt(0)}</div>
-      <div><small>{t.coluna}</small><strong>{SITE.colunista}</strong></div>
+    <div class="coluna-topo">
+      <div><small>{t.coluna}</small><h2>{SITE.colunista}</h2></div>
+      {SITE.blogUrl && <a class="botao" href={SITE.blogUrl} target="_blank" rel="noopener">{t.verBlog}</a>}
     </div>
-    <div>
-      <span class="etiqueta clara">{t.colunaAutoral}</span>
-      <h3>{post.data.titulo}</h3>
-      <p>{post.data.resumo}</p>
-      <a class="botao" href={`/coluna/${post.id}/`}>{t.lerColuna}</a>
+    <div class="coluna-grade">
+      {posts.map((p) => (
+        <article class="post-blog">
+          {p.imagem && (
+            <a class="capa" href={p.link} target={externo(p.link) ? "_blank" : undefined} rel="noopener" tabindex="-1" aria-hidden="true">
+              <img src={p.imagem} alt="" loading="lazy" />
+            </a>
+          )}
+          <div class="meta">
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>{SITE.colunista}</span>
+            <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
+              <time datetime={p.data.toISOString()}>{p.data.toLocaleDateString(localeData(), { day: "numeric", month: "long", year: "numeric" })}</time>
+            </span>
+          </div>
+          <h3><a href={p.link} target={externo(p.link) ? "_blank" : undefined} rel="noopener">{p.titulo}</a></h3>
+          {p.resumo && <p>{p.resumo}</p>}
+        </article>
+      ))}
     </div>
   </section>
 )}

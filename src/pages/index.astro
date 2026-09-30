@@ -7,6 +7,7 @@ import ColunaDestaque from "../components/ColunaDestaque.astro";
 import Newsletter from "../components/Newsletter.astro";
 import JanelaNoticia from "../components/JanelaNoticia.astro";
 import { noticiasPublicadas, colunas, cardsArchilly, escolherDestaques } from "../lib/conteudo";
+import { postsDoBlog } from "../lib/blog";
 import { textos } from "../i18n";
 
 const NA_CAPA = 24;
@@ -14,7 +15,11 @@ const t = textos();
 const todas = await noticiasPublicadas();
 const destaques = escolherDestaques(todas);
 const feed = todas.filter((n) => !destaques.includes(n)).slice(0, NA_CAPA);
-const [ultimaColuna] = await colunas();
+// Coluna: posts do blog; se o blog não responder, usa a coluna guardada no site
+const doBlog = await postsDoBlog(3);
+const postsColuna = doBlog.length ? doBlog : (await colunas()).slice(0, 3).map((c) => ({
+  titulo: c.data.titulo, resumo: c.data.resumo, data: c.data.publicadoEm, link: `/coluna/${c.id}/`, imagem: c.data.imagem,
+}));
 const cards = await cardsArchilly();
 ---
 <Base compacto={false}>
@@ -27,7 +32,7 @@ const cards = await cardsArchilly();
       <div class="ver-todas"><a class="botao" href="/arquivo/">{t.verTodas}</a></div>
     )}
   </section>
-  <ColunaDestaque post={ultimaColuna} />
+  <ColunaDestaque posts={postsColuna} />
   <Newsletter />
   <JanelaNoticia slot="depois" noticias={[...destaques, ...feed]} />
 </Base>

@@ -8,7 +8,7 @@ Para retomar com o Claude, diga: **"vamos continuar o site de notícias"**.
 - [ ] **Nome definitivo do site.** Com ele dá para comprar um domínio próprio (ex.: `.com.br`, cerca de R$ 40 por ano) e ligar à Vercel.
 - [ ] **Cores e logo da Archilly**, para o selo e os cards.
 - [ ] **Lista de produtos Archilly** para os cards do feed: imagem, uma frase e link de cada um.
-- [ ] **Endereço do seu blog pessoal**, para a coluna.
+- [x] **Endereço do seu blog pessoal**, para a coluna: stica.com.br/blog.
 - [ ] **Seu nome, foto e uma frase de apresentação** para a coluna.
 
 ## 2. Robô de notícias (a parte principal)
@@ -22,7 +22,8 @@ Para retomar com o Claude, diga: **"vamos continuar o site de notícias"**.
 - [ ] Definir a regra do "misto": quais fontes são confiáveis e qual nota mínima deixa a notícia publicar sozinha.
 
 ## 4. Coluna e Archilly
-- [ ] Puxar automaticamente os posts do blog para a coluna.
+- [x] Puxar automaticamente os posts do blog para a coluna (os 3 mais recentes, com imagem, em cartões verticais).
+- [ ] Montar o site de novo sozinho todo dia, para os posts novos do blog aparecerem sem precisar de um envio ao GitHub (junto com o robô de notícias).
 - [ ] Colocar os cards reais da Archilly no lugar dos de exemplo.
 
 ## 5. Newsletter
