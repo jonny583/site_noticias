@@ -66,6 +66,11 @@ img { display: block; max-width: 100%; }
 .editorias a:hover { color: var(--tinta); background: var(--papel-2); }
 .editorias a[aria-current="page"] { background: var(--tinta); color: var(--papel); }
 
+/* Aba da Archilly no menu: diferente das editorias de notícia */
+.editorias a.aba-archilly { display: inline-flex; align-items: center; gap: 7px; color: var(--tinta); }
+.editorias a.aba-archilly i { width: 9px; height: 9px; border-radius: 3px; background: var(--archilly-claro); box-shadow: 0 0 0 2px var(--archilly); }
+.editorias a.aba-archilly[aria-current="page"] { background: var(--archilly); color: #F2F5EE; }
+
 /* Indicadores */
 .indicadores { border-bottom: 1px solid var(--linha); overflow: hidden; font: 500 12px/1 var(--mono); color: var(--tinta-2); }
 .indicadores .faixa { display: flex; gap: 36px; padding: 10px 0; white-space: nowrap; animation: correr 40s linear infinite; width: max-content; }
@@ -170,6 +175,23 @@ img { display: block; max-width: 100%; }
 .chamada-archilly small { font: 500 10.5px/1 var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--tinta-2); }
 .chamada-archilly p { margin: 0; font-size: 14.5px; line-height: 1.5; }
 .chamada-archilly .botao-archilly { background: var(--archilly); color: #F2F5EE; font-size: 13px; padding: 9px 14px; }
+
+/* Página Soluções Archilly */
+.etiqueta-archilly { display: inline-block; font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; padding: 5px 8px; border-radius: 4px; background: var(--archilly-claro); color: var(--archilly); }
+.solucoes-topo { margin: 28px 0 24px; background: var(--archilly); color: #F2F5EE; border-radius: 18px; padding: 32px 22px; }
+@media (min-width: 900px) { .solucoes-topo { padding: 48px; } }
+.solucoes-topo h1 { font: 800 clamp(32px, 4.6vw, 54px)/1.04 var(--serifa); letter-spacing: -.03em; margin: 14px 0 12px; max-width: 18ch; }
+.solucoes-topo p { margin: 0 0 22px; max-width: 60ch; font-size: 17px; color: rgba(242,245,238,.82); }
+.solucoes-topo .acoes { display: flex; flex-wrap: wrap; gap: 10px; }
+.solucoes-topo .botao { border-color: rgba(242,245,238,.5); color: #F2F5EE; padding: 11px 18px; font-size: 14px; }
+.solucoes-lista { display: grid; gap: 20px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .solucoes-lista { grid-template-columns: repeat(2, 1fr); } }
+.solucao { background: var(--card); border: 1px solid var(--linha); border-top: 4px solid var(--archilly); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+.solucao small { font: 500 11px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-2); }
+.solucao h2 { font: 700 24px/1.15 var(--serifa); letter-spacing: -.01em; margin: 0; }
+.solucao p { margin: 0 0 6px; color: var(--tinta-2); flex: 1; }
+.solucao .botao-archilly { background: var(--archilly); color: #F2F5EE; }
+.solucoes-aviso { font: 500 11px/1.4 var(--mono); color: var(--tinta-2); text-align: center; margin: 28px 0 8px; }
 
 /* Newsletter */
 .news { margin: 28px 0; background: var(--tinta); color: var(--papel); border-radius: 16px; padding: 20px; display: grid; gap: 14px; }

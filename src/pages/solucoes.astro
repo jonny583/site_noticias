@@ -1,0 +1,37 @@
+---
+// Soluções Archilly: a página da marca dentro do Radar (fica no lugar da antiga aba Coluna).
+// O Radar traz o leitor pela notícia; aqui ele conhece a Archilly. No site da Archilly,
+// um botão traz de volta para as notícias. Produtos em src/content/archilly (exemplos por enquanto).
+import Base from "../layouts/Base.astro";
+import { SITE } from "../config.js";
+import { cardsArchilly } from "../lib/conteudo";
+import { textos } from "../i18n";
+const t = textos();
+const produtos = await cardsArchilly();
+---
+<Base titulo={t.solucoes} editoria="solucoes">
+  <section class="solucoes-topo">
+    <div>
+      <span class="etiqueta-archilly">Archilly</span>
+      <h1>Do terreno ao projeto aprovado, com inteligência.</h1>
+      <p>A Archilly ajuda incorporadores e loteadores a estudar terrenos, conferir a legislação e desenhar empreendimentos em dias, não em meses.</p>
+      <div class="acoes">
+        <a class="botao-archilly" href={SITE.archillyUrl} target="_blank" rel="noopener">Conhecer a Archilly</a>
+        <a class="botao" href="/">Ver as notícias do setor</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="solucoes-lista" aria-label={t.solucoes}>
+    {produtos.map((p) => (
+      <article class="solucao">
+        <small>{p.data.titulo}</small>
+        {p.data.pergunta && <h2>{p.data.pergunta}</h2>}
+        <p>{p.data.resumo}</p>
+        <a class="botao-archilly" href={p.data.url} target="_blank" rel="noopener">{p.data.chamada}</a>
+      </article>
+    ))}
+  </section>
+
+  <p class="solucoes-aviso">Página de exemplo: os textos e produtos são provisórios.</p>
+</Base>

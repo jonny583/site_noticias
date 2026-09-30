@@ -27,6 +27,8 @@ Para retomar com o Claude, diga: **"vamos continuar o site de notícias"**.
 - [ ] **Opcional, com o amigo que cuida do servidor do blog:** o blog avisar o site na hora em que um post é publicado, para ele aparecer em cerca de 1 minuto. Ver "Pedido para o amigo do blog" abaixo.
 - [x] Faixa Archilly na capa (entre as notícias e a Coluna, um produto sorteado a cada visita) e chamada no fim de cada notícia, ligada à aba. Com produtos de exemplo em `src/content/archilly`.
 - [ ] Trocar os produtos de exemplo pelos reais quando a Archilly estiver no ar (nome, pergunta, frase, link e em quais abas cada um aparece).
+- [x] Aba "Soluções Archilly" no lugar da aba Coluna, com página própria (/solucoes/) e botão para as notícias.
+- [ ] No site da Archilly, quando estiver no ar: um botão "Ver as notícias do setor" que leva ao Radar (um alimenta o outro).
 
 ### Pedido para o amigo do blog
 

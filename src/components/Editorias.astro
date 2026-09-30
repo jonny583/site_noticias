@@ -4,16 +4,17 @@ import { textos } from "../i18n";
 interface Props { atual?: string }
 const { atual = "tudo" } = Astro.props;
 const t = textos();
-const itens = [
+const itens: { slug: string; nome: string; href: string; marca?: boolean }[] = [
   { slug: "tudo", nome: t.tudo, href: "/" },
   ...CATEGORIAS.map((c) => ({ slug: c, nome: t.categorias[c], href: `/categoria/${c}/` })),
-  { slug: "coluna", nome: t.coluna, href: "/coluna/" },
+  // A Coluna já aparece na capa e no fim das abas; no lugar dela, a página da Archilly
+  { slug: "solucoes", nome: t.solucoes, href: "/solucoes/", marca: true },
 ];
 ---
 <nav class="editorias" aria-label={t.editorias}>
   <div class="envelope">
     <ul>
-      {itens.map((i) => <li><a href={i.href} aria-current={i.slug === atual ? "page" : undefined}>{i.nome}</a></li>)}
+      {itens.map((i) => <li><a href={i.href} class={i.marca ? "aba-archilly" : undefined} aria-current={i.slug === atual ? "page" : undefined}>{i.marca && <i aria-hidden="true"></i>}{i.nome}</a></li>)}
     </ul>
   </div>
 </nav>
