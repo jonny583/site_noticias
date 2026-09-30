@@ -77,6 +77,38 @@ if (linha && setasLinha) {
   atualizar();
 }
 
+// ---------- Últimas da capa: páginas de 8, com setas ----------
+const paginasEl = $("[data-paginas]");
+const setasPaginas = $("[data-setas-paginas]");
+if (paginasEl && setasPaginas) {
+  const total = Number(paginasEl.dataset.total);
+  const porPagina = Number(paginasEl.dataset.porPagina);
+  const quantas = paginasEl.children.length;
+  const ant = $<HTMLButtonElement>("[data-ant]", setasPaginas)!;
+  const prox = $<HTMLButtonElement>("[data-prox]", setasPaginas)!;
+  const contador = $("[data-contador]", setasPaginas);
+  const largura = () => paginasEl.clientWidth + parseFloat(getComputedStyle(paginasEl).columnGap || "0");
+  const atual = () => Math.round(paginasEl.scrollLeft / largura());
+  const atualizar = () => {
+    const i = atual();
+    setasPaginas.hidden = quantas <= 1;
+    ant.style.visibility = i > 0 ? "visible" : "hidden";
+    prox.disabled = i >= quantas - 1;
+    if (contador) contador.textContent = `${i * porPagina + 1}–${Math.min((i + 1) * porPagina, total)} de ${total}`;
+  };
+  const irPara = (i: number) => {
+    paginasEl.scrollTo({ left: Math.max(0, Math.min(i, quantas - 1)) * largura(), behavior: semMovimento ? "auto" : "smooth" });
+    // ao voltar ou avançar, sobe até o título "Últimas" se ele saiu da tela
+    const topo = setasPaginas.getBoundingClientRect().top;
+    if (topo < 0) window.scrollBy({ top: topo - 80, behavior: semMovimento ? "auto" : "smooth" });
+  };
+  ant.addEventListener("click", () => irPara(atual() - 1));
+  prox.addEventListener("click", () => irPara(atual() + 1));
+  paginasEl.addEventListener("scroll", () => requestAnimationFrame(atualizar), { passive: true });
+  addEventListener("resize", atualizar);
+  atualizar();
+}
+
 // ---------- Janela da notícia ----------
 type DadosJanela = {
   id: string; titulo: string; resumo: string; categoria: string; tags: string[];

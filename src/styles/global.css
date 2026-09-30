@@ -284,6 +284,13 @@ footer nav { display: flex; flex-wrap: wrap; gap: 16px; }
 
 /* Paginação */
 .paginacao { display: flex; justify-content: space-between; gap: 12px; padding: 28px 0; }
+/* Últimas da capa em páginas de 8, passando com as setas */
+.rotulo-secao .setas[hidden] { display: none; }
+.rotulo-secao .setas { align-items: center; }
+.rotulo-secao .botao-icone:disabled { opacity: .3; cursor: default; }
+.paginas { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; gap: 24px; align-items: start; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 4px 4px 26px; margin: -4px -4px -14px; }
+.paginas::-webkit-scrollbar { display: none; }
+.pagina { scroll-snap-align: start; }
 .ver-todas { display: flex; justify-content: center; padding: 24px 0 0; }
 
 /* Lista da coluna */

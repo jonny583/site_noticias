@@ -17,6 +17,9 @@ const t = textos();
 const todas = await noticiasPublicadas();
 const destaques = escolherDestaques(todas);
 const feed = todas.filter((n) => !destaques.includes(n)).slice(0, NA_CAPA);
+// Últimas: 8 por vez (2 linhas de 4); as mais antigas ficam nas páginas seguintes, pelas setas
+const POR_PAGINA = 8;
+const paginas = Array.from({ length: Math.ceil(feed.length / POR_PAGINA) }, (_, k) => feed.slice(k * POR_PAGINA, (k + 1) * POR_PAGINA));
 // Coluna: posts do blog; se o blog não responder, usa a coluna guardada no site
 const doBlog = await gruposDoBlog(SITE.blogCapa);
 const gruposColuna = doBlog.length ? doBlog : [{ nome: t.coluna, posts: (await colunas()).slice(0, 3).map((c) => ({
@@ -27,8 +30,17 @@ const gruposColuna = doBlog.length ? doBlog : [{ nome: t.coluna, posts: (await c
   <Indicadores slot="antes" />
   <Carrossel noticias={destaques} />
   <section class="feed" aria-label={t.ultimas}>
-    <div class="rotulo-secao"><h2>{t.ultimas}</h2></div>
-    <Grade noticias={feed} />
+    <div class="rotulo-secao">
+      <h2>{t.ultimas}</h2>
+      <div class="setas" data-setas-paginas hidden>
+        <span class="contador" data-contador></span>
+        <button class="botao botao-icone" data-ant aria-label={t.anterior}>←</button>
+        <button class="botao botao-icone" data-prox aria-label={t.proximo}>→</button>
+      </div>
+    </div>
+    <div class="paginas" data-paginas data-total={feed.length} data-por-pagina={POR_PAGINA}>
+      {paginas.map((p) => <div class="pagina"><Grade noticias={p} /></div>)}
+    </div>
     {todas.length > destaques.length + NA_CAPA && (
       <div class="ver-todas"><a class="botao" href="/arquivo/">{t.verTodas}</a></div>
     )}
