@@ -67,6 +67,7 @@ Para retomar com o Claude, diga: **"vamos continuar o site de notícias"**.
 - [ ] Calibrar fontes e notas depois de 1 ou 2 semanas de uso.
 
 ## Mais para frente
+- [ ] Revisar as categorias dos posts no blog (ex.: "Por que cidades bem planejadas geram mais valor" está só em Arquitetura). Por enquanto fica como está: 2 de Incorporações e 1 de Arquitetura.
 - [ ] Versão em inglês (o site já está preparado para isso).
 - [ ] Busca por palavra dentro do site.
 - [ ] Página para cada região ou cidade.
