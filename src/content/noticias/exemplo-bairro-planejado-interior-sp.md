@@ -1,7 +1,7 @@
 ---
 titulo: "Bairro planejado de 2 milhões de m² é lançado no interior paulista"
 resumo: "Um novo bairro planejado com lotes residenciais e comerciais, parque linear e centro de serviços foi anunciado no interior de São Paulo. O projeto prevê implantação em quatro fases ao longo de oito anos e aposta em infraestrutura entregue antes das vendas, tendência que vem ganhando força entre loteadoras de médio porte."
-categoria: loteamentos
+categoria: condominios-loteamentos
 fonte:
   nome: "Portal do Setor (exemplo)"
   url: "https://example.com/bairro-planejado-interior-sp"

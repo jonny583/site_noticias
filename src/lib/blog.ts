@@ -20,7 +20,19 @@ function limpar(html: string) {
     .trim();
 }
 
-type PostComCategorias = PostBlog & { categorias: number[] };
+type PostComCategorias = PostBlog & { categorias: number[]; tags: string[] };
+
+// "#Inovação" -> "inovacao": sem #, sem acento, minúsculas
+const semAcento = (texto: string) =>
+  texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+// As # (tags) do blog: número da tag -> nomes aceitos (o endereço curto e o nome sem acento)
+async function tagsDoBlog(): Promise<Map<number, string[]>> {
+  const resp = await fetch(SITE.blogApi.replace(/\/posts$/, "/tags") + "?per_page=100&_fields=id,name,slug", { signal: AbortSignal.timeout(15000) });
+  if (!resp.ok) return new Map();
+  const tags = (await resp.json()) as { id: number; name: string; slug: string }[];
+  return new Map(tags.map((t) => [t.id, [semAcento(t.slug), semAcento(limpar(t.name))]]));
+}
 
 // O blog é consultado uma vez só, mesmo que várias páginas usem os posts
 let consulta: Promise<PostComCategorias[]> | undefined;
@@ -29,11 +41,15 @@ function todosOsPosts() {
   consulta ??= (async () => {
     if (!SITE.blogApi) return [];
     try {
-      const resp = await fetch(`${SITE.blogApi}?per_page=30&_embed=wp:featuredmedia`, { signal: AbortSignal.timeout(15000) });
+      const [resp, tags] = await Promise.all([
+        fetch(`${SITE.blogApi}?per_page=30&_embed=wp:featuredmedia`, { signal: AbortSignal.timeout(15000) }),
+        tagsDoBlog().catch(() => new Map<number, string[]>()),
+      ]);
       if (!resp.ok) return [];
       return ((await resp.json()) as any[])
         .map((p) => ({
           categorias: (p.categories ?? []) as number[],
+          tags: ((p.tags ?? []) as number[]).flatMap((id) => tags.get(id) ?? []),
           titulo: limpar(p.title?.rendered ?? ""),
           link: p.link as string,
           data: new Date(p.date_gmt ? p.date_gmt + "Z" : p.date),
@@ -48,7 +64,8 @@ function todosOsPosts() {
   return consulta;
 }
 
-export interface SecaoBlog { nome: string; categoria: number; quantos: number }
+// Uma seção pega os posts de uma seção do blog (categoria) ou os que têm alguma das # (tags)
+export interface SecaoBlog { nome: string; categoria?: number; tags?: string[]; quantos: number }
 export interface GrupoBlog { nome: string; posts: PostBlog[] }
 
 // Os posts mais recentes de cada seção do blog, na ordem da lista.
@@ -58,9 +75,12 @@ export async function gruposDoBlog(secoes: SecaoBlog[]): Promise<GrupoBlog[]> {
   const usados = new Set<PostComCategorias>();
   return secoes
     .map((secao) => {
-      const escolhidos = posts.filter((p) => p.categorias.includes(secao.categoria) && !usados.has(p)).slice(0, secao.quantos);
+      const tagsAceitas = (secao.tags ?? []).map(semAcento);
+      const combina = (p: PostComCategorias) =>
+        (secao.categoria !== undefined && p.categorias.includes(secao.categoria)) || p.tags.some((t) => tagsAceitas.includes(t));
+      const escolhidos = posts.filter((p) => combina(p) && !usados.has(p)).slice(0, secao.quantos);
       escolhidos.forEach((p) => usados.add(p));
-      return { nome: secao.nome, posts: escolhidos.map(({ categorias, ...p }) => p) };
+      return { nome: secao.nome, posts: escolhidos.map(({ categorias, tags, ...p }) => p) };
     })
     .filter((g) => g.posts.length > 0);
 }

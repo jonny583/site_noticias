@@ -1,7 +1,7 @@
 ---
 titulo: "Loteamentos abertos crescem no Nordeste com lotes de entrada acessível"
 resumo: "Levantamento regional aponta aumento de lançamentos de loteamentos abertos voltados ao primeiro imóvel, com parcelamento direto com a loteadora. O movimento acompanha a expansão de polos logísticos e industriais em cidades médias."
-categoria: loteamentos
+categoria: condominios-loteamentos
 fonte:
   nome: "Nordeste Negócios (exemplo)"
   url: "https://example.com/loteamento-aberto-nordeste"

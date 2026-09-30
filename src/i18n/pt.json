@@ -7,12 +7,11 @@
   "editorias": "Editorias",
   "tudo": "Tudo",
   "categorias": {
-    "loteamentos": "Loteamentos",
-    "condominios": "Condomínios",
+    "condominios-loteamentos": "Condomínios & Loteamentos",
     "edificios": "Edifícios",
     "mercado": "Mercado & Economia",
     "mundo": "Mundo & Projetos",
-    "inovacao": "Inovação",
+    "inovacao": "Inovação na Construção",
     "legislacao": "Legislação"
   },
   "emDestaque": "Em destaque",

@@ -1,7 +1,7 @@
 ---
 titulo: "Condomínios horizontais adotam usinas solares compartilhadas"
 resumo: "Novos empreendimentos passaram a incluir geração solar coletiva já no projeto, reduzindo a taxa condominial e virando argumento de venda. O modelo exige planejamento da área técnica ainda na fase de parcelamento."
-categoria: condominios
+categoria: condominios-loteamentos
 fonte:
   nome: "Energia & Imóveis (exemplo)"
   url: "https://example.com/condominio-energia-solar"

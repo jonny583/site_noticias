@@ -16,8 +16,15 @@ export const SITE = {
     { nome: "Arquitetura e Urbanismo", categoria: 10, quantos: 1 },
   ],
   // No fim da página de cada aba (editoria). Aba que não está aqui fica sem Coluna.
+  // Pode escolher os posts pela seção do blog ("categoria") ou pelas # do post ("tags",
+  // escritas sem # e sem acento: a tag #inovação no blog vira "inovacao").
   blogPorEditoria: {
+    "condominios-loteamentos": [{ nome: "Condomínios & Loteamentos", tags: ["condominio", "condominios", "loteamento", "loteamentos"], quantos: 3 }],
+    edificios: [{ nome: "Edifícios", tags: ["edificio", "edificios"], quantos: 3 }],
+    mercado: [{ nome: "Mercado & Economia", tags: ["mercado"], quantos: 3 }],
     mundo: [{ nome: "Arquitetura e Urbanismo", categoria: 10, quantos: 3 }],
+    inovacao: [{ nome: "Inovação na Construção", tags: ["inovacao", "construcao"], quantos: 3 }],
+    legislacao: [{ nome: "Legislação", tags: ["legislacao"], quantos: 3 }],
   },
   emailContato: "contato@archilly.com.br",
   // Formulário da newsletter (Brevo/Buttondown). Vazio = formulário de demonstração.
