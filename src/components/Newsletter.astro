@@ -12,5 +12,9 @@ const demo = !SITE.newsletterAction;
   <form action={demo ? undefined : SITE.newsletterAction} method="post" target="_blank" data-newsletter={demo ? "demo" : undefined} data-ok={t.newsOk}>
     <input type="email" name="email" required placeholder="seu@email.com.br" aria-label={t.seuEmail} />
     <button type="submit">{t.newsBotao}</button>
+    <div class="news-opcoes">
+      <label><input type="checkbox" name="frequencia" value="semanal" checked /> {t.newsSemanal}</label>
+      <label><input type="checkbox" name="frequencia" value="mensal" checked /> {t.newsMensal}</label>
+    </div>
   </form>
 </section>

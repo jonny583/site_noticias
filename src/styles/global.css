@@ -136,14 +136,17 @@ img { display: block; max-width: 100%; }
 .coluna p { margin: 0 0 14px; color: var(--tinta-2); max-width: 70ch; }
 
 /* Newsletter */
-.news { margin: 36px 0; background: var(--tinta); color: var(--papel); border-radius: 18px; padding: 28px 20px; display: grid; gap: 18px; }
-@media (min-width: 900px) { .news { grid-template-columns: 1.2fr 1fr; align-items: center; padding: 40px; } }
-.news h2 { font: 700 clamp(26px, 3vw, 36px)/1.1 var(--serifa); margin: 0 0 8px; letter-spacing: -.02em; }
-.news p { margin: 0; opacity: .75; }
+.news { margin: 28px 0; background: var(--tinta); color: var(--papel); border-radius: 16px; padding: 20px; display: grid; gap: 14px; }
+@media (min-width: 900px) { .news { grid-template-columns: 1fr minmax(380px, 1fr); align-items: center; gap: 32px; padding: 20px 32px; } }
+.news h2 { font: 700 clamp(22px, 2.2vw, 28px)/1.1 var(--serifa); margin: 0 0 4px; letter-spacing: -.02em; }
+.news p { margin: 0; opacity: .75; font-size: 14px; line-height: 1.4; }
 .news form { display: flex; flex-wrap: wrap; gap: 8px; }
-.news input { flex: 1 1 200px; min-width: 0; font: 15px var(--sans); padding: 13px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: transparent; color: var(--papel); }
+.news-opcoes { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 14px; padding-left: 6px; }
+.news-opcoes label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; opacity: .85; }
+.news-opcoes input { width: 16px; height: 16px; margin: 0; accent-color: var(--archilly-claro); cursor: pointer; }
+.news input[type="email"] { flex: 1 1 200px; min-width: 0; font: 15px var(--sans); padding: 10px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: transparent; color: var(--papel); }
 .news input::placeholder { color: rgba(255,255,255,.5); }
-.news button { font: 600 15px var(--sans); padding: 13px 20px; border-radius: 999px; border: 0; background: var(--archilly-claro); color: var(--archilly); cursor: pointer; }
+.news button { font: 600 15px var(--sans); padding: 10px 20px; border-radius: 999px; border: 0; background: var(--archilly-claro); color: var(--archilly); cursor: pointer; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .news { background: var(--papel-2); color: var(--tinta); } :root:not([data-theme="light"]) .news input { color: var(--tinta); } }
 :root[data-theme="dark"] .news { background: var(--papel-2); color: var(--tinta); }
 :root[data-theme="dark"] .news input { color: var(--tinta); }
