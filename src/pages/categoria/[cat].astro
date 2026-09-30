@@ -2,6 +2,9 @@
 import Base from "../../layouts/Base.astro";
 import Grade from "../../components/Grade.astro";
 import JanelaNoticia from "../../components/JanelaNoticia.astro";
+import ColunaDestaque from "../../components/ColunaDestaque.astro";
+import { gruposDoBlog } from "../../lib/blog";
+import { SITE } from "../../config.js";
 import { CATEGORIAS, type Categoria } from "../../lib/categorias";
 import { noticiasPublicadas, cardsArchilly, nomeCategoria } from "../../lib/conteudo";
 import { textos } from "../../i18n";
@@ -14,6 +17,8 @@ const t = textos();
 const nome = nomeCategoria(cat);
 const lista = (await noticiasPublicadas()).filter((n) => n.data.categoria === cat).slice(0, 60);
 const cards = await cardsArchilly();
+// Posts do blog no fim da página, se esta aba tiver seções configuradas
+const gruposColuna = await gruposDoBlog((SITE.blogPorEditoria as Record<string, any[]>)[cat] ?? []);
 ---
 <Base titulo={nome} editoria={cat}>
   <div class="titulo-pagina">
@@ -22,6 +27,7 @@ const cards = await cardsArchilly();
     <p>{lista.length} {lista.length === 1 ? t.noticia : t.noticias}</p>
   </div>
   <Grade noticias={lista} cards={cards} />
+  <ColunaDestaque grupos={gruposColuna} />
   <div class="paginacao"><a class="botao" href="/">{t.voltarInicio}</a></div>
   <JanelaNoticia slot="depois" noticias={lista} />
 </Base>

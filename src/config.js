@@ -10,10 +10,15 @@ export const SITE = {
   blogApi: "https://stica.com.br/wp-json/wp/v2/posts",
   // Quais seções do blog entram na Coluna, e quantos posts de cada.
   // "categoria" é o número da categoria no WordPress (8 = Incorporações, 10 = Arquitetura).
-  blogSecoes: [
+  // Na capa:
+  blogCapa: [
     { nome: "Incorporações", categoria: 8, quantos: 2 },
-    { nome: "Arquitetura", categoria: 10, quantos: 1 },
+    { nome: "Arquitetura e Urbanismo", categoria: 10, quantos: 1 },
   ],
+  // No fim da página de cada aba (editoria). Aba que não está aqui fica sem Coluna.
+  blogPorEditoria: {
+    mundo: [{ nome: "Arquitetura e Urbanismo", categoria: 10, quantos: 3 }],
+  },
   emailContato: "contato@archilly.com.br",
   // Formulário da newsletter (Brevo/Buttondown). Vazio = formulário de demonstração.
   newsletterAction: "",

@@ -20,35 +20,47 @@ function limpar(html: string) {
     .trim();
 }
 
-// Quantos posts de cada seção do blog vão para a capa (SITE.blogSecoes),
-// na ordem da lista. Um post que está em duas seções conta só uma vez.
-export async function postsDoBlog(): Promise<PostBlog[]> {
-  if (!SITE.blogApi) return [];
-  try {
-    const resp = await fetch(`${SITE.blogApi}?per_page=30&_embed=wp:featuredmedia`, { signal: AbortSignal.timeout(15000) });
-    if (!resp.ok) return [];
-    const posts = ((await resp.json()) as any[])
-      .map((p) => ({
-        categorias: (p.categories ?? []) as number[],
-        titulo: limpar(p.title?.rendered ?? ""),
-        link: p.link as string,
-        data: new Date(p.date_gmt ? p.date_gmt + "Z" : p.date),
-        resumo: limpar(p.excerpt?.rendered ?? ""),
-        imagem: p._embedded?.["wp:featuredmedia"]?.[0]?.source_url as string | undefined,
-      }))
-      .filter((p) => p.titulo && p.imagem);   // só posts com imagem de capa, como os cartões do blog
+type PostComCategorias = PostBlog & { categorias: number[] };
 
-    const escolhidos: typeof posts = [];
-    for (const secao of SITE.blogSecoes) {
-      posts
-        .filter((p) => p.categorias.includes(secao.categoria) && !escolhidos.includes(p))
-        .slice(0, secao.quantos)
-        .forEach((p) => escolhidos.push(p));
+// O blog é consultado uma vez só, mesmo que várias páginas usem os posts
+let consulta: Promise<PostComCategorias[]> | undefined;
+
+function todosOsPosts() {
+  consulta ??= (async () => {
+    if (!SITE.blogApi) return [];
+    try {
+      const resp = await fetch(`${SITE.blogApi}?per_page=30&_embed=wp:featuredmedia`, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) return [];
+      return ((await resp.json()) as any[])
+        .map((p) => ({
+          categorias: (p.categories ?? []) as number[],
+          titulo: limpar(p.title?.rendered ?? ""),
+          link: p.link as string,
+          data: new Date(p.date_gmt ? p.date_gmt + "Z" : p.date),
+          resumo: limpar(p.excerpt?.rendered ?? ""),
+          imagem: p._embedded?.["wp:featuredmedia"]?.[0]?.source_url as string | undefined,
+        }))
+        .filter((p) => p.titulo && p.imagem);   // só posts com imagem de capa, como os cartões do blog
+    } catch {
+      return [];
     }
-    return escolhidos
-      .sort((a, b) => b.data.getTime() - a.data.getTime())
-      .map(({ categorias, ...p }) => p);
-  } catch {
-    return [];
-  }
+  })();
+  return consulta;
+}
+
+export interface SecaoBlog { nome: string; categoria: number; quantos: number }
+export interface GrupoBlog { nome: string; posts: PostBlog[] }
+
+// Os posts mais recentes de cada seção do blog, na ordem da lista.
+// Um post que está em duas seções aparece só na primeira.
+export async function gruposDoBlog(secoes: SecaoBlog[]): Promise<GrupoBlog[]> {
+  const posts = await todosOsPosts();
+  const usados = new Set<PostComCategorias>();
+  return secoes
+    .map((secao) => {
+      const escolhidos = posts.filter((p) => p.categorias.includes(secao.categoria) && !usados.has(p)).slice(0, secao.quantos);
+      escolhidos.forEach((p) => usados.add(p));
+      return { nome: secao.nome, posts: escolhidos.map(({ categorias, ...p }) => p) };
+    })
+    .filter((g) => g.posts.length > 0);
 }
