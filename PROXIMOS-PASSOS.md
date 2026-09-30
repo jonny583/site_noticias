@@ -22,9 +22,38 @@ Para retomar com o Claude, diga: **"vamos continuar o site de notícias"**.
 - [ ] Definir a regra do "misto": quais fontes são confiáveis e qual nota mínima deixa a notícia publicar sozinha.
 
 ## 4. Coluna e Archilly
-- [x] Puxar automaticamente os posts do blog para a coluna (os 3 mais recentes, com imagem, em cartões verticais).
+- [x] Puxar automaticamente os posts do blog para a coluna (2 de Incorporações e 1 de Arquitetura, com imagem, em cartões verticais).
 - [ ] Montar o site de novo sozinho todo dia, para os posts novos do blog aparecerem sem precisar de um envio ao GitHub (junto com o robô de notícias).
+- [ ] **Opcional, com o amigo que cuida do servidor do blog:** o blog avisar o site na hora em que um post é publicado, para ele aparecer em cerca de 1 minuto. Ver "Pedido para o amigo do blog" abaixo.
 - [ ] Colocar os cards reais da Archilly no lugar dos de exemplo.
+
+### Pedido para o amigo do blog
+
+**Situação:** hoje não é preciso mexer em nada no servidor do blog: o site já lê os posts. Este pedido só faz o post novo aparecer no site mais rápido.
+
+**Antes de mandar:** criar na Vercel o "endereço de aviso" (Deploy Hook). Projeto site-noticias → Settings → Git → Deploy Hooks → nome `blog`, branch `main` → Create Hook. Copiar o endereço gerado e mandar ao amigo **só em mensagem particular**, nunca em grupo nem em público, porque quem tiver esse endereço consegue mandar o site ser montado de novo.
+
+**Texto para mandar:**
+
+> Oi! Estou fazendo um site de notícias do setor imobiliário (feito em Astro, publicado na Vercel) que mostra na capa os posts mais recentes do meu blog stica.com.br. Na hora de montar o site, ele lê a API do WordPress:
+>
+> `GET https://stica.com.br/wp-json/wp/v2/posts?per_page=30&_embed=wp:featuredmedia`
+>
+> (usa title, link, date_gmt, excerpt, categories e a imagem de destaque pelo _embed). Isso já funciona hoje. Queria te pedir duas coisas:
+>
+> 1. **Manter essa API aberta**: `/wp-json/wp/v2/posts` e `/wp-json/wp/v2/media` públicas, sem bloqueio de plugin de segurança, firewall ou cache para as requisições da Vercel.
+> 2. **Avisar a Vercel quando um post for publicado, alterado ou despublicado**, chamando um Deploy Hook (um POST numa URL que te mando em particular). Assim o site é montado de novo na hora. Pensei em algo assim, num mu-plugin ou no functions.php do tema filho, com a URL guardada no wp-config.php (`define('VERCEL_DEPLOY_HOOK', '...');`) e não no código:
+>
+> ```
+> add_action('transition_post_status', function ($novo, $antigo, $post) {
+>     if ($post->post_type !== 'post' || !defined('VERCEL_DEPLOY_HOOK')) return;
+>     if ($novo === 'publish' || $antigo === 'publish') {
+>         wp_remote_post(VERCEL_DEPLOY_HOOK, ['blocking' => false, 'timeout' => 5]);
+>     }
+> }, 10, 3);
+> ```
+>
+> Se preferir outro jeito (plugin de webhook, por exemplo), fica à vontade: o que importa é um POST nessa URL quando um post publicado mudar. Valeu!
 
 ## 5. Newsletter
 - [ ] Criar a conta num serviço gratuito (Brevo ou Buttondown) e ligar o formulário do site.
