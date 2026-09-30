@@ -2,7 +2,7 @@
 export const SITE = {
   nome: "Radar Incorpora",
   nomeMarca: ["Radar", "Incorpora"], // exibido como "Radar.Incorpora" no cabeçalho
-  url: "https://radarincorpora.netlify.app",
+  url: "https://site-noticias-gules.vercel.app",
   archillyUrl: "https://archilly.com.br",
   colunista: "Nome do colunista",
   emailContato: "contato@archilly.com.br",
