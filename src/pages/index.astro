@@ -6,7 +6,7 @@ import Grade from "../components/Grade.astro";
 import ColunaDestaque from "../components/ColunaDestaque.astro";
 import Newsletter from "../components/Newsletter.astro";
 import JanelaNoticia from "../components/JanelaNoticia.astro";
-import { noticiasPublicadas, colunas, cardsArchilly, escolherDestaques } from "../lib/conteudo";
+import { noticiasPublicadas, colunas, escolherDestaques } from "../lib/conteudo";
 import { gruposDoBlog } from "../lib/blog";
 import { SITE } from "../config.js";
 import { textos } from "../i18n";
@@ -21,14 +21,13 @@ const doBlog = await gruposDoBlog(SITE.blogCapa);
 const gruposColuna = doBlog.length ? doBlog : [{ nome: t.coluna, posts: (await colunas()).slice(0, 3).map((c) => ({
   titulo: c.data.titulo, resumo: c.data.resumo, data: c.data.publicadoEm, link: `/coluna/${c.id}/`, imagem: c.data.imagem,
 })) }];
-const cards = await cardsArchilly();
 ---
 <Base compacto={false}>
   <Indicadores slot="antes" />
   <Carrossel noticias={destaques} />
   <section class="feed" aria-label={t.ultimas}>
     <div class="rotulo-secao"><h2>{t.ultimas}</h2></div>
-    <Grade noticias={feed} cards={cards} />
+    <Grade noticias={feed} />
     {todas.length > destaques.length + NA_CAPA && (
       <div class="ver-todas"><a class="botao" href="/arquivo/">{t.verTodas}</a></div>
     )}

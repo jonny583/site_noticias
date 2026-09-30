@@ -6,7 +6,7 @@ import ColunaDestaque from "../../components/ColunaDestaque.astro";
 import { gruposDoBlog } from "../../lib/blog";
 import { SITE } from "../../config.js";
 import { CATEGORIAS, type Categoria } from "../../lib/categorias";
-import { noticiasPublicadas, cardsArchilly, nomeCategoria } from "../../lib/conteudo";
+import { noticiasPublicadas, nomeCategoria } from "../../lib/conteudo";
 import { textos } from "../../i18n";
 
 export function getStaticPaths() {
@@ -16,7 +16,6 @@ const cat = Astro.params.cat as Categoria;
 const t = textos();
 const nome = nomeCategoria(cat);
 const lista = (await noticiasPublicadas()).filter((n) => n.data.categoria === cat).slice(0, 60);
-const cards = await cardsArchilly();
 // Posts do blog no fim da página, se esta aba tiver seções configuradas
 const gruposColuna = await gruposDoBlog((SITE.blogPorEditoria as Record<string, any[]>)[cat] ?? []);
 ---
@@ -26,7 +25,7 @@ const gruposColuna = await gruposDoBlog((SITE.blogPorEditoria as Record<string, 
     <h1>{nome}</h1>
     <p>{lista.length} {lista.length === 1 ? t.noticia : t.noticias}</p>
   </div>
-  <Grade noticias={lista} cards={cards} />
+  <Grade noticias={lista} />
   <ColunaDestaque grupos={gruposColuna} />
   <div class="paginacao"><a class="botao" href="/">{t.voltarInicio}</a></div>
   <JanelaNoticia slot="depois" noticias={lista} />
