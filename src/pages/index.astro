@@ -5,8 +5,9 @@ import Carrossel from "../components/Carrossel.astro";
 import Grade from "../components/Grade.astro";
 import ColunaDestaque from "../components/ColunaDestaque.astro";
 import Newsletter from "../components/Newsletter.astro";
+import FaixaArchilly from "../components/FaixaArchilly.astro";
 import JanelaNoticia from "../components/JanelaNoticia.astro";
-import { noticiasPublicadas, colunas, escolherDestaques } from "../lib/conteudo";
+import { noticiasPublicadas, colunas, escolherDestaques, cardsArchilly } from "../lib/conteudo";
 import { gruposDoBlog } from "../lib/blog";
 import { SITE } from "../config.js";
 import { textos } from "../i18n";
@@ -32,6 +33,7 @@ const gruposColuna = doBlog.length ? doBlog : [{ nome: t.coluna, posts: (await c
       <div class="ver-todas"><a class="botao" href="/arquivo/">{t.verTodas}</a></div>
     )}
   </section>
+  <FaixaArchilly produtos={await cardsArchilly()} />
   <ColunaDestaque grupos={gruposColuna} />
   <Newsletter />
   <JanelaNoticia slot="depois" noticias={[...destaques, ...feed]} />

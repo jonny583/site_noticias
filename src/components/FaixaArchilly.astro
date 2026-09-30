@@ -1,0 +1,25 @@
+---
+// Faixa da Archilly na capa, entre as notícias e a Coluna.
+// Todos os produtos vão na página; a cada visita um deles é sorteado para aparecer.
+import type { CardArchilly } from "../lib/conteudo";
+interface Props { produtos: CardArchilly[] }
+const { produtos } = Astro.props;
+---
+{produtos.length > 0 && (
+  <aside class="faixa-archilly" aria-label="Archilly">
+    {produtos.map((p, i) => (
+      <div class="faixa-item" hidden={i > 0}>
+        <div class="faixa-marca"><i aria-hidden="true"></i><span>Archilly<br /><b>{p.data.titulo}</b></span></div>
+        <p>{p.data.pergunta && <strong>{p.data.pergunta} </strong>}{p.data.resumo}</p>
+        <a class="botao-archilly" href={p.data.url} target="_blank" rel="noopener">{p.data.chamada}</a>
+      </div>
+    ))}
+  </aside>
+)}
+<script>
+  const itens = document.querySelectorAll<HTMLElement>(".faixa-archilly .faixa-item");
+  if (itens.length > 1) {
+    const sorteado = Math.floor(Math.random() * itens.length);
+    itens.forEach((el, i) => (el.hidden = i !== sorteado));
+  }
+</script>

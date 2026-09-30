@@ -5,7 +5,7 @@ Site no ar: https://site-noticias-gules.vercel.app/ (atualiza sozinho a cada env
 Para retomar com o Claude, diga: **"vamos continuar o site de notícias"**.
 
 ## 1. Definições suas (sem programar, destravam o resto)
-- [ ] **Nome definitivo do site.** Com ele dá para comprar um domínio próprio (ex.: `.com.br`, cerca de R$ 40 por ano) e ligar à Vercel.
+- [ ] **Confirmar o domínio.** O plano é o site ficar em `archilly.com.br/radar` (junto do site da Archilly, que reforça a marca). Quando confirmar, o Claude ajusta o site para funcionar nesse endereço e explica o que configurar no domínio.
 - [ ] **Cores e logo da Archilly**, para o selo e os cards.
 - [ ] **Lista de produtos Archilly** para os cards do feed: imagem, uma frase e link de cada um.
 - [x] **Endereço do seu blog pessoal**, para a coluna: stica.com.br/blog.
@@ -25,7 +25,8 @@ Para retomar com o Claude, diga: **"vamos continuar o site de notícias"**.
 - [x] Puxar automaticamente os posts do blog para a coluna (2 de Incorporações e 1 de Arquitetura, com imagem, em cartões verticais).
 - [ ] Montar o site de novo sozinho todo dia, para os posts novos do blog aparecerem sem precisar de um envio ao GitHub (junto com o robô de notícias).
 - [ ] **Opcional, com o amigo que cuida do servidor do blog:** o blog avisar o site na hora em que um post é publicado, para ele aparecer em cerca de 1 minuto. Ver "Pedido para o amigo do blog" abaixo.
-- [ ] Colocar os cards reais da Archilly no lugar dos de exemplo.
+- [x] Faixa Archilly na capa (entre as notícias e a Coluna, um produto sorteado a cada visita) e chamada no fim de cada notícia, ligada à aba. Com produtos de exemplo em `src/content/archilly`.
+- [ ] Trocar os produtos de exemplo pelos reais quando a Archilly estiver no ar (nome, pergunta, frase, link e em quais abas cada um aparece).
 
 ### Pedido para o amigo do blog
 

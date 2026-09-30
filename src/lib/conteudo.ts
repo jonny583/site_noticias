@@ -19,6 +19,11 @@ export async function colunas(idioma: Idioma = IDIOMA_PADRAO) {
   return todas.sort(maisNovas);
 }
 
+/** Produto Archilly para o fim de uma notícia: o ligado à aba dela; se nenhum for, o primeiro. */
+export function produtoPara(categoria: string, produtos: CardArchilly[]) {
+  return produtos.find((p) => (p.data.editorias as string[]).includes(categoria)) ?? produtos[0];
+}
+
 export async function cardsArchilly() {
   const todos = await getCollection("archilly", ({ data }) => data.ativo);
   return todos.sort((a, b) => a.data.ordem - b.data.ordem);

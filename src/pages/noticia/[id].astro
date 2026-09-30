@@ -5,7 +5,8 @@ import Base from "../../layouts/Base.astro";
 import Foto from "../../components/Foto.astro";
 import Grade from "../../components/Grade.astro";
 import JanelaNoticia from "../../components/JanelaNoticia.astro";
-import { noticiasPublicadas, nomeCategoria, dataCompleta, type Noticia } from "../../lib/conteudo";
+import ChamadaArchilly from "../../components/ChamadaArchilly.astro";
+import { noticiasPublicadas, nomeCategoria, dataCompleta, cardsArchilly, produtoPara, type Noticia } from "../../lib/conteudo";
 import { textos } from "../../i18n";
 
 export async function getStaticPaths() {
@@ -20,6 +21,7 @@ const { noticia, relacionadas } = Astro.props;
 const d = noticia.data;
 const t = textos();
 const cat = nomeCategoria(d.categoria);
+const produto = produtoPara(d.categoria, await cardsArchilly());
 const dadosEstruturados = {
   "@context": "https://schema.org",
   "@type": "NewsArticle",
@@ -49,6 +51,7 @@ const dadosEstruturados = {
         <button class="botao" data-compartilhar>{t.compartilhar}</button>
         <a class="botao" href="/">{t.voltarInicio}</a>
       </div>
+      <ChamadaArchilly produto={produto} />
     </div>
   </article>
   {relacionadas.length > 0 && (

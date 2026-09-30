@@ -1,0 +1,14 @@
+---
+// Chamada da Archilly no fim da notícia, ligada ao assunto (aba) dela.
+import type { CardArchilly } from "../lib/conteudo";
+interface Props { produto?: CardArchilly }
+const { produto } = Astro.props;
+const d = produto?.data;
+---
+{d && (
+  <aside class="chamada-archilly">
+    <small>Archilly</small>
+    <p>{d.pergunta && <strong>{d.pergunta} </strong>}{d.resumo}</p>
+    <a class="botao-archilly" href={d.url} target="_blank" rel="noopener">{d.chamada}</a>
+  </aside>
+)}

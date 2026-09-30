@@ -43,6 +43,10 @@ const archilly = defineCollection({
     titulo: z.string(),
     resumo: z.string(),
     chamada: z.string().default("Conhecer"),
+    // Pergunta curta que abre a chamada (ex.: "Estudando um terreno?")
+    pergunta: z.string().optional(),
+    // Abas em que este produto aparece no fim das notícias
+    editorias: z.array(z.enum(CATEGORIAS)).default([]),
     url: z.url(),
     imagem: z.string().optional(),
     ativo: z.boolean().default(true),

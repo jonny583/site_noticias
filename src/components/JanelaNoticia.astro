@@ -1,12 +1,18 @@
 ---
 // Janela que abre a notícia por cima da página (o "+").
 // Recebe os dados das notícias da página em JSON para não precisar recarregar.
-import { paraJanela, type Noticia } from "../lib/conteudo";
+import { paraJanela, cardsArchilly, produtoPara, type Noticia } from "../lib/conteudo";
 import { textos } from "../i18n";
 interface Props { noticias: Noticia[] }
 const { noticias } = Astro.props;
 const t = textos();
-const dados = Object.fromEntries(noticias.map((n) => [n.id, paraJanela(n)]));
+const produtos = await cardsArchilly();
+// cada notícia leva junto a chamada Archilly ligada à aba dela
+const dados = Object.fromEntries(noticias.map((n) => {
+  const p = produtoPara(n.data.categoria, produtos)?.data;
+  const cta = p && { pergunta: p.pergunta ?? "", resumo: p.resumo, chamada: p.chamada, url: p.url };
+  return [n.id, { ...paraJanela(n), cta }];
+}));
 const rotulos = { fonte: t.fonte, foto: t.foto, avisoIA: t.avisoIA, linkCopiado: t.linkCopiado };
 const json = (x: unknown) => JSON.stringify(x).replace(/</g, "\\u003c");
 ---
@@ -29,6 +35,11 @@ const json = (x: unknown) => JSON.stringify(x).replace(/</g, "\\u003c");
         <a class="botao cheio" id="m-fonte" href="#" target="_blank" rel="noopener">{t.lerNaFonte}</a>
         <button class="botao" data-compartilhar>{t.compartilhar}</button>
       </div>
+      <aside class="chamada-archilly" id="m-cta" hidden>
+        <small>Archilly</small>
+        <p><strong id="m-cta-pergunta"></strong> <span id="m-cta-resumo"></span></p>
+        <a class="botao-archilly" id="m-cta-link" href="#" target="_blank" rel="noopener"></a>
+      </aside>
     </div>
   </article>
 </div>

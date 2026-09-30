@@ -1,8 +1,9 @@
 ---
-titulo: "Do terreno ao masterplan em dias, não em meses"
-resumo: "Conheça como a Archilly ajuda incorporadores a estudar a viabilidade e desenhar loteamentos com inteligência — do primeiro traço ao projeto aprovado."
-chamada: "Conhecer a Archilly"
+titulo: "Estudo de massa e masterplan"
+pergunta: "Estudando um terreno?"
+resumo: "A Archilly faz o estudo de massa e o masterplan em dias, não em meses."
+chamada: "Conhecer"
 url: "https://archilly.com.br"
-imagem: "https://picsum.photos/seed/archilly-1/1200/1200"
+editorias: ["condominios-loteamentos", "edificios"]
 ordem: 1
 ---

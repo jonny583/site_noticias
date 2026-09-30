@@ -54,6 +54,7 @@ $$("[data-carrossel]").forEach((sec) => {
 type DadosJanela = {
   id: string; titulo: string; resumo: string; categoria: string; tags: string[];
   fonte: { nome: string; url: string }; data: string; regiao: string; imagem: string; creditoImagem: string;
+  cta?: { pergunta: string; resumo: string; chamada: string; url: string };
 };
 const modal = $("#modal");
 const dadosEl = $("#dados-noticias");
@@ -91,6 +92,17 @@ if (modal && dadosEl) {
     cred.append(`${rotulos.fonte}: `, b, ` · ${n.data}${n.regiao ? " · " + n.regiao : ""}`, document.createElement("br"),
       `${rotulos.avisoIA} ${rotulos.foto}: ${n.creditoImagem}.`);
     $<HTMLAnchorElement>("#m-fonte")!.href = n.fonte.url;
+    const cta = $("#m-cta");
+    if (cta) {
+      cta.hidden = !n.cta;
+      if (n.cta) {
+        txt($("#m-cta-pergunta"), n.cta.pergunta);
+        txt($("#m-cta-resumo"), n.cta.resumo);
+        const link = $<HTMLAnchorElement>("#m-cta-link")!;
+        link.href = n.cta.url;
+        link.textContent = n.cta.chamada;
+      }
+    }
     modal!.classList.add("aberto");
     document.body.classList.add("travado");
     $<HTMLButtonElement>(".fechar", modal!)!.focus();
