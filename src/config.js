@@ -8,6 +8,12 @@ export const SITE = {
   // Blog do colunista (WordPress): os posts mais recentes aparecem na Coluna da capa
   blogUrl: "https://stica.com.br/blog/",
   blogApi: "https://stica.com.br/wp-json/wp/v2/posts",
+  // Quais seções do blog entram na Coluna, e quantos posts de cada.
+  // "categoria" é o número da categoria no WordPress (8 = Incorporações, 10 = Arquitetura).
+  blogSecoes: [
+    { nome: "Incorporações", categoria: 8, quantos: 2 },
+    { nome: "Arquitetura", categoria: 10, quantos: 1 },
+  ],
   emailContato: "contato@archilly.com.br",
   // Formulário da newsletter (Brevo/Buttondown). Vazio = formulário de demonstração.
   newsletterAction: "",

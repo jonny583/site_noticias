@@ -16,7 +16,7 @@ const todas = await noticiasPublicadas();
 const destaques = escolherDestaques(todas);
 const feed = todas.filter((n) => !destaques.includes(n)).slice(0, NA_CAPA);
 // Coluna: posts do blog; se o blog não responder, usa a coluna guardada no site
-const doBlog = await postsDoBlog(3);
+const doBlog = await postsDoBlog();
 const postsColuna = doBlog.length ? doBlog : (await colunas()).slice(0, 3).map((c) => ({
   titulo: c.data.titulo, resumo: c.data.resumo, data: c.data.publicadoEm, link: `/coluna/${c.id}/`, imagem: c.data.imagem,
 }));

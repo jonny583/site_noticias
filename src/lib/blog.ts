@@ -20,22 +20,34 @@ function limpar(html: string) {
     .trim();
 }
 
-export async function postsDoBlog(quantos = 3): Promise<PostBlog[]> {
+// Quantos posts de cada seção do blog vão para a capa (SITE.blogSecoes),
+// na ordem da lista. Um post que está em duas seções conta só uma vez.
+export async function postsDoBlog(): Promise<PostBlog[]> {
   if (!SITE.blogApi) return [];
   try {
-    const resp = await fetch(`${SITE.blogApi}?per_page=10&_embed=wp:featuredmedia`, { signal: AbortSignal.timeout(15000) });
+    const resp = await fetch(`${SITE.blogApi}?per_page=30&_embed=wp:featuredmedia`, { signal: AbortSignal.timeout(15000) });
     if (!resp.ok) return [];
-    const posts: any[] = await resp.json();
-    return posts
+    const posts = ((await resp.json()) as any[])
       .map((p) => ({
+        categorias: (p.categories ?? []) as number[],
         titulo: limpar(p.title?.rendered ?? ""),
-        link: p.link,
+        link: p.link as string,
         data: new Date(p.date_gmt ? p.date_gmt + "Z" : p.date),
         resumo: limpar(p.excerpt?.rendered ?? ""),
-        imagem: p._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
+        imagem: p._embedded?.["wp:featuredmedia"]?.[0]?.source_url as string | undefined,
       }))
-      .filter((p) => p.titulo && p.imagem)   // só posts com imagem de capa, como os cartões do blog
-      .slice(0, quantos);
+      .filter((p) => p.titulo && p.imagem);   // só posts com imagem de capa, como os cartões do blog
+
+    const escolhidos: typeof posts = [];
+    for (const secao of SITE.blogSecoes) {
+      posts
+        .filter((p) => p.categorias.includes(secao.categoria) && !escolhidos.includes(p))
+        .slice(0, secao.quantos)
+        .forEach((p) => escolhidos.push(p));
+    }
+    return escolhidos
+      .sort((a, b) => b.data.getTime() - a.data.getTime())
+      .map(({ categorias, ...p }) => p);
   } catch {
     return [];
   }
