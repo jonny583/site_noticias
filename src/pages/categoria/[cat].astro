@@ -23,9 +23,16 @@ const gruposColuna = await gruposDoBlog((SITE.blogPorEditoria as Record<string, 
   <div class="titulo-pagina">
     <span class="etiqueta">{t.editorias}</span>
     <h1>{nome}</h1>
-    <p>{lista.length} {lista.length === 1 ? t.noticia : t.noticias}</p>
+    <div class="titulo-linha">
+      <p>{lista.length} {lista.length === 1 ? t.noticia : t.noticias}</p>
+      <div class="setas" data-setas-linha hidden>
+        <span class="contador" data-contador></span>
+        <button class="botao botao-icone" data-ant aria-label={t.anterior}>←</button>
+        <button class="botao botao-icone" data-prox aria-label={t.proximo}>→</button>
+      </div>
+    </div>
   </div>
-  <Grade noticias={lista} />
+  <Grade noticias={lista} linha />
   <ColunaDestaque grupos={gruposColuna} />
   <div class="paginacao"><a class="botao" href="/">{t.voltarInicio}</a></div>
   <JanelaNoticia slot="depois" noticias={lista} />

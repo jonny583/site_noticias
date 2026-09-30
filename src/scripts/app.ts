@@ -50,6 +50,33 @@ $$("[data-carrossel]").forEach((sec) => {
   if (!semMovimento) setInterval(() => { if (!pausa && !document.hidden) irPara(atual() + 1); }, 6000);
 });
 
+// ---------- Notícias numa linha só, com setas (páginas das abas) ----------
+const linha = $(".grade.linha");
+const setasLinha = $("[data-setas-linha]");
+if (linha && setasLinha) {
+  const cartoes = [...linha.children] as HTMLElement[];
+  const ant = $<HTMLButtonElement>("[data-ant]", setasLinha)!;
+  const prox = $<HTMLButtonElement>("[data-prox]", setasLinha)!;
+  const contador = $("[data-contador]", setasLinha);
+  const passo = () => cartoes[0].getBoundingClientRect().width + parseFloat(getComputedStyle(linha).columnGap || "0");
+  const atualizar = () => {
+    const cabe = Math.max(1, Math.round((linha.clientWidth + 1) / passo()));
+    const primeiro = Math.round(linha.scrollLeft / passo());
+    const noFim = linha.scrollLeft + linha.clientWidth >= linha.scrollWidth - 4;
+    setasLinha.hidden = cartoes.length <= cabe;
+    ant.style.visibility = primeiro > 0 ? "visible" : "hidden";   // o ← aparece depois de avançar
+    prox.disabled = noFim;
+    if (contador) contador.textContent = `${primeiro + 1}–${Math.min(primeiro + cabe, cartoes.length)} de ${cartoes.length}`;
+  };
+  const mover = (sentido: number) =>
+    linha.scrollBy({ left: sentido * (linha.clientWidth + parseFloat(getComputedStyle(linha).columnGap || "0")), behavior: semMovimento ? "auto" : "smooth" });
+  ant.addEventListener("click", () => mover(-1));
+  prox.addEventListener("click", () => mover(1));
+  linha.addEventListener("scroll", () => requestAnimationFrame(atualizar), { passive: true });
+  addEventListener("resize", atualizar);
+  atualizar();
+}
+
 // ---------- Janela da notícia ----------
 type DadosJanela = {
   id: string; titulo: string; resumo: string; categoria: string; tags: string[];

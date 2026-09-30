@@ -5,8 +5,9 @@ import CardArchilly from "./CardArchilly.astro";
 import type { Noticia, CardArchilly as TCard } from "../lib/conteudo";
 import { SITE } from "../config.js";
 import { textos } from "../i18n";
-interface Props { noticias: Noticia[]; cards?: TCard[] }
-const { noticias, cards = [] } = Astro.props;
+// linha: todas numa linha só, passando com as setas (páginas das abas)
+interface Props { noticias: Noticia[]; cards?: TCard[]; linha?: boolean }
+const { noticias, cards = [], linha = false } = Astro.props;
 const a = SITE.archillyACada;
 const itens: ({ tipo: "n"; n: Noticia } | { tipo: "a"; c: TCard })[] = [];
 noticias.forEach((n, i) => {
@@ -15,7 +16,7 @@ noticias.forEach((n, i) => {
 });
 ---
 {noticias.length ? (
-  <div class="grade">
+  <div class={linha ? "grade linha" : "grade"}>
     {itens.map((it) => (it.tipo === "n" ? <CardNoticia noticia={it.n} /> : <CardArchilly card={it.c} />))}
   </div>
 ) : (
