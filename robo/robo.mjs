@@ -31,7 +31,8 @@ const TESTE = process.argv.includes("--teste");
 // No computador, a chave vem do .env. No GitHub, ela já chega pronta.
 if (fs.existsSync(path.join(RAIZ, ".env"))) process.loadEnvFile(path.join(RAIZ, ".env"));
 const CHAVE = process.env.GEMINI_API_KEY;
-const MODELO = process.env.GEMINI_MODEL || "gemini-flash-latest";
+// Primeiro o modelo escolhido; se estiver sobrecarregado, os reservas.
+const MODELOS = [...new Set([process.env.GEMINI_MODEL || "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash"])];
 if (!CHAVE) {
   console.error("Falta a chave: preencha GEMINI_API_KEY no arquivo .env (ou no segredo do GitHub).");
   process.exit(1);
@@ -114,7 +115,7 @@ Escolha só as que interessam a esse público: lançamentos e projetos imobiliá
 bairros planejados, mercado imobiliário e crédito, custos de construção (INCC), legislação urbana
 (plano diretor, zoneamento, Reurb, licenciamento), inovação na construção e grandes projetos de
 arquitetura e urbanismo no mundo. Descarte política geral, crimes, anúncios de imóvel à venda,
-notas de serviço sem interesse para o setor e notícias repetidas (mesmo fato em fontes diferentes:
+notas de serviço sem interesse para o setor, sites de fofoca/entretenimento ou de origem duvidosa e notícias repetidas (mesmo fato em fontes diferentes:
 fique com a mais completa). Descarte também o que repetir um destes assuntos já publicados:
 {{JA_PUBLICADOS}}
 
@@ -125,7 +126,9 @@ Para cada notícia escolhida, devolva:
   (mundo = arquitetura/urbanismo fora do Brasil; edificios = prédios e incorporação vertical)
 - titulo: título próprio em português, claro e curto (até 90 caracteres), sem sensacionalismo
 - resumo: 2 a 3 frases em português, com suas palavras (não copie o texto da fonte). Use só o que está
-  no título e no trecho; não invente números, nomes nem fatos. Se só houver o título, faça 1 frase.
+  no título e no trecho; não invente números, nomes nem fatos, nem acrescente adjetivos
+  ("nobre", "de destaque", "bilhões") que não estejam lá. Se só houver o título, faça 1 frase que diga
+  apenas o que o título diz.
 - regiao: cidade/estado, "Brasil" ou o país, se der para saber; senão deixe vazio
 - tags: de 1 a 3 palavras-chave curtas
 
@@ -154,20 +157,35 @@ async function perguntarAoGemini(itens, jaPublicados) {
   }));
   const instrucoes = INSTRUCOES.replace("{{JA_PUBLICADOS}}", jaPublicados.length ? jaPublicados.map((t) => `- ${t}`).join("\n") : "(nenhum ainda)");
 
-  const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELO}:generateContent`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": CHAVE },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: instrucoes }] },
-      contents: [{ role: "user", parts: [{ text: JSON.stringify(lista) }] }],
-      generationConfig: { responseMimeType: "application/json", responseSchema: ESQUEMA, temperature: 0.3 },
-    }),
-    signal: AbortSignal.timeout(120000),
+  const corpo = JSON.stringify({
+    systemInstruction: { parts: [{ text: instrucoes }] },
+    contents: [{ role: "user", parts: [{ text: JSON.stringify(lista) }] }],
+    generationConfig: { responseMimeType: "application/json", responseSchema: ESQUEMA, temperature: 0.3 },
   });
-  if (!resp.ok) throw new Error(`Gemini respondeu ${resp.status}: ${(await resp.text()).slice(0, 500)}`);
-  const json = await resp.json();
-  const texto = json.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "[]";
-  return JSON.parse(texto);
+
+  // Se o modelo estiver sobrecarregado (acontece no plano grátis), espera e tenta de novo; depois tenta os reservas.
+  let ultimoErro;
+  for (const modelo of MODELOS) {
+    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": CHAVE },
+        body: corpo,
+        signal: AbortSignal.timeout(180000),
+      }).catch((e) => ({ ok: false, status: 0, text: async () => e.message }));
+      if (resp.ok) {
+        const json = await resp.json();
+        const texto = json.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "[]";
+        console.log(`(respondido pelo ${modelo})`);
+        return JSON.parse(texto);
+      }
+      ultimoErro = `${modelo} respondeu ${resp.status}: ${(await resp.text()).slice(0, 300)}`;
+      if (![0, 429, 500, 503].includes(resp.status)) throw new Error(ultimoErro); // erro de verdade (ex.: chave errada)
+      console.log(`${modelo} ocupado (${resp.status}), tentativa ${tentativa} de 3...`);
+      if (tentativa < 3) await new Promise((r) => setTimeout(r, 20000 * tentativa));
+    }
+  }
+  throw new Error(`Nenhum modelo do Gemini respondeu. Último erro: ${ultimoErro}`);
 }
 
 // ---------- 4. Imagem e arquivo ----------
@@ -244,7 +262,7 @@ if (!novos.length) {
   process.exit(0);
 }
 
-console.log(`\nMandando ${novos.length} itens para o Gemini (${MODELO})...`);
+console.log(`\nMandando ${novos.length} itens para o Gemini (${MODELOS[0]})...`);
 const escolhidas = (await perguntarAoGemini(novos, titulosJaPublicados().slice(-40)))
   .filter((n) => novos[n.id] && n.nota >= NOTA_RASCUNHO && CATEGORIAS.includes(n.categoria))
   .sort((a, b) => b.nota - a.nota)
