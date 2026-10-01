@@ -1,8 +1,11 @@
 // Robô garimpeiro de notícias.
 // 1. Lê os feeds de robo/fontes.json.
 // 2. Separa o que é novo (não visto antes) e recente.
-// 3. Manda para o Gemini, que escolhe o que interessa, dá nota, categoria e escreve o resumo.
-// 4. Salva cada notícia escolhida como arquivo em src/content/noticias.
+// 3. Peneira: o Gemini olha a lista e escolhe as candidatas pelo título e trecho.
+// 4. Juiz: para as que vieram do Google News, o Gemini busca a notícia no Google, lê e confere
+//    se é novidade e se o site é confiável (e pode trocar pela melhor fonte do mesmo fato).
+//    As fontes diretas da lista (Estadão, CBIC...) já foram aprovadas e não passam pelo juiz.
+// 5. Salva cada notícia aprovada como arquivo em src/content/noticias.
 //
 // Rodar no computador:  npm run robo           (salva as notícias)
 //                       npm run robo -- --teste (só mostra, não salva nada)
@@ -22,7 +25,8 @@ const CATEGORIAS = ["condominios-loteamentos", "edificios", "mercado", "mundo", 
 const NOTA_PUBLICAR = 7;   // nota a partir da qual a notícia vai direto para o site
 const NOTA_RASCUNHO = 5;   // entre esta e a de cima: salva escondida (rascunho), para aprovar depois
 const MAX_POR_RODADA = 8;  // no máximo quantas notícias novas por vez
-const MAX_PARA_IA = 60;    // no máximo quantos itens mandar para a IA de uma vez
+const MAX_CANDIDATAS = 12; // quantas passam da peneira para o juiz
+const MAX_PARA_IA = 60;    // no máximo quantos itens mandar para a peneira de uma vez
 const HORAS_RECENTE = 48;  // ignora notícias mais velhas que isso
 const MAX_POR_FONTE = 8;   // de cada fonte, só as mais recentes (para nenhuma dominar)
 
@@ -32,7 +36,7 @@ const TESTE = process.argv.includes("--teste");
 if (fs.existsSync(path.join(RAIZ, ".env"))) process.loadEnvFile(path.join(RAIZ, ".env"));
 const CHAVE = process.env.GEMINI_API_KEY;
 // Primeiro o modelo escolhido; se estiver sobrecarregado, os reservas.
-const MODELOS = [...new Set([process.env.GEMINI_MODEL || "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash"])];
+const MODELOS = [...new Set([process.env.GEMINI_MODEL || "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-3.5-flash"])];
 if (!CHAVE) {
   console.error("Falta a chave: preencha GEMINI_API_KEY no arquivo .env (ou no segredo do GitHub).");
   process.exit(1);
@@ -82,10 +86,12 @@ async function lerFeed(fonte) {
     return {
       titulo,
       url: limpar(campo(it, "link")),
+      linkDoFeed: limpar(campo(it, "link")), // guardado em vistos.json mesmo se o juiz trocar o endereço
       data: new Date(limpar(campo(it, "pubDate")) || Date.now()),
       fonte: nomeFonte,
       texto: doGoogle ? "" : texto.slice(0, 1200),
       imagem: imagemDoItem(it),
+      confiavel: !doGoogle, // fontes diretas foram aprovadas pelo usuário; as do Google News passam pelo juiz
     };
   }).filter((i) => i.titulo && i.url);
 }
@@ -105,7 +111,33 @@ function titulosJaPublicados() {
     .filter(Boolean);
 }
 
-// ---------- 3. Perguntar ao Gemini ----------
+// ---------- Conversa com o Gemini ----------
+
+const textoDa = (json) => json.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+
+// Se o modelo estiver sobrecarregado (acontece no plano grátis), espera e tenta de novo; depois tenta os reservas.
+async function chamarGemini(pedido) {
+  const corpo = JSON.stringify(pedido);
+  let ultimoErro;
+  for (const modelo of MODELOS) {
+    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": CHAVE },
+        body: corpo,
+        signal: AbortSignal.timeout(180000),
+      }).catch((e) => ({ ok: false, status: 0, text: async () => e.message }));
+      if (resp.ok) return resp.json();
+      ultimoErro = `${modelo} respondeu ${resp.status}: ${(await resp.text()).slice(0, 300)}`;
+      if (![0, 429, 500, 503].includes(resp.status)) throw new Error(ultimoErro); // erro de verdade (ex.: chave errada)
+      console.log(`${modelo} ocupado (${resp.status}), tentativa ${tentativa} de 3...`);
+      if (tentativa < 3) await new Promise((r) => setTimeout(r, 20000 * tentativa));
+    }
+  }
+  throw new Error(`Nenhum modelo do Gemini respondeu. Último erro: ${ultimoErro}`);
+}
+
+// ---------- 3. Peneira ----------
 
 const INSTRUCOES = `Você é o editor do "Radar Incorpora", um portal brasileiro de notícias para quem trabalha com
 incorporação imobiliária, loteamentos, condomínios, arquitetura e urbanismo.
@@ -115,8 +147,9 @@ Escolha só as que interessam a esse público: lançamentos e projetos imobiliá
 bairros planejados, mercado imobiliário e crédito, custos de construção (INCC), legislação urbana
 (plano diretor, zoneamento, Reurb, licenciamento), inovação na construção e grandes projetos de
 arquitetura e urbanismo no mundo. Descarte política geral, crimes, anúncios de imóvel à venda,
-notas de serviço sem interesse para o setor, sites de fofoca/entretenimento ou de origem duvidosa e notícias repetidas (mesmo fato em fontes diferentes:
-fique com a mais completa). Descarte também o que repetir um destes assuntos já publicados:
+notas de serviço sem interesse para o setor, sites de fofoca/entretenimento ou de origem duvidosa
+e notícias repetidas (mesmo fato em fontes diferentes: fique com a mais completa).
+Descarte também o que repetir um destes assuntos já publicados:
 {{JA_PUBLICADOS}}
 
 Para cada notícia escolhida, devolva:
@@ -132,7 +165,7 @@ Para cada notícia escolhida, devolva:
 - regiao: cidade/estado, "Brasil" ou o país, se der para saber; senão deixe vazio
 - tags: de 1 a 3 palavras-chave curtas
 
-Devolva no máximo ${MAX_POR_RODADA} notícias, as de nota mais alta. Se nada interessar, devolva uma lista vazia.`;
+Devolva no máximo ${MAX_CANDIDATAS} notícias, as de nota mais alta. Se nada interessar, devolva uma lista vazia.`;
 
 const ESQUEMA = {
   type: "ARRAY",
@@ -151,55 +184,76 @@ const ESQUEMA = {
   },
 };
 
-async function perguntarAoGemini(itens, jaPublicados) {
+async function peneirar(itens, jaPublicados) {
   const lista = itens.map((it, id) => ({
     id, titulo: it.titulo, fonte: it.fonte, data: it.data.toISOString().slice(0, 10), trecho: it.texto || undefined,
   }));
   const instrucoes = INSTRUCOES.replace("{{JA_PUBLICADOS}}", jaPublicados.length ? jaPublicados.map((t) => `- ${t}`).join("\n") : "(nenhum ainda)");
-
-  const corpo = JSON.stringify({
+  const json = await chamarGemini({
     systemInstruction: { parts: [{ text: instrucoes }] },
     contents: [{ role: "user", parts: [{ text: JSON.stringify(lista) }] }],
     generationConfig: { responseMimeType: "application/json", responseSchema: ESQUEMA, temperature: 0.3 },
   });
-
-  // Se o modelo estiver sobrecarregado (acontece no plano grátis), espera e tenta de novo; depois tenta os reservas.
-  let ultimoErro;
-  for (const modelo of MODELOS) {
-    for (let tentativa = 1; tentativa <= 3; tentativa++) {
-      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": CHAVE },
-        body: corpo,
-        signal: AbortSignal.timeout(180000),
-      }).catch((e) => ({ ok: false, status: 0, text: async () => e.message }));
-      if (resp.ok) {
-        const json = await resp.json();
-        const texto = json.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "[]";
-        console.log(`(respondido pelo ${modelo})`);
-        return JSON.parse(texto);
-      }
-      ultimoErro = `${modelo} respondeu ${resp.status}: ${(await resp.text()).slice(0, 300)}`;
-      if (![0, 429, 500, 503].includes(resp.status)) throw new Error(ultimoErro); // erro de verdade (ex.: chave errada)
-      console.log(`${modelo} ocupado (${resp.status}), tentativa ${tentativa} de 3...`);
-      if (tentativa < 3) await new Promise((r) => setTimeout(r, 20000 * tentativa));
-    }
-  }
-  throw new Error(`Nenhum modelo do Gemini respondeu. Último erro: ${ultimoErro}`);
+  return JSON.parse(textoDa(json) || "[]");
 }
 
-// ---------- 4. Imagem e arquivo ----------
+// ---------- 4. Juiz ----------
+
+const INSTRUCOES_JUIZ = `Você é o juiz de qualidade do "Radar Incorpora", portal de notícias para profissionais de
+incorporação imobiliária, loteamentos, arquitetura e urbanismo. Use a busca do Google para encontrar e LER a
+notícia indicada (e outras coberturas do mesmo fato). Depois responda SOMENTE com um JSON, sem texto em volta:
+{
+  "encontrou": true ou false (achou e leu a notícia?),
+  "novidade": true ou false (fato dos últimos dias; não é republicação de assunto antigo nem matéria "de gaveta"),
+  "fonteConfiavel": true ou false (veículo jornalístico reconhecido, entidade do setor ou órgão público),
+  "aprovada": true ou false (vale publicar para esse público?),
+  "motivo": "uma frase explicando a decisão",
+  "fonte": { "nome": "nome do veículo", "url": "endereço da PÁGINA da notícia" },
+  "titulo": "título próprio em português, até 90 caracteres, sem sensacionalismo",
+  "resumo": "2 a 3 frases com suas palavras, baseadas no que você leu; sem inventar nada",
+  "nota": número de 0 a 10,
+  "regiao": "cidade/estado, Brasil ou país",
+  "tags": ["1 a 3 palavras-chave"]
+}
+Se o mesmo fato saiu num veículo melhor (grande jornal, entidade oficial), use esse como "fonte".
+A "url" tem que ser o endereço real da matéria que você leu (não a página inicial do site, nem um link do Google).
+Se não tiver certeza do endereço, devolva a url vazia.`;
+
+async function julgar(it, n) {
+  const json = await chamarGemini({
+    systemInstruction: { parts: [{ text: INSTRUCOES_JUIZ }] },
+    contents: [{ role: "user", parts: [{ text: `Notícia: "${it.titulo}" (publicada por ${it.fonte} em ${it.data.toISOString().slice(0, 10)}). Categoria sugerida: ${n.categoria}.` }] }],
+    tools: [{ google_search: {} }],
+    generationConfig: { temperature: 0.2 },
+  });
+  const m = textoDa(json).match(/\{[\s\S]*\}/);
+  if (!m) return { encontrou: false, motivo: "o juiz não respondeu no formato combinado" };
+  try { return JSON.parse(m[0]); } catch { return { encontrou: false, motivo: "resposta do juiz ilegível" }; }
+}
+
+// Confere se o endereço que o juiz deu existe de verdade (e não é a página inicial). Devolve a página, se ok.
+async function baixarMateria(url) {
+  try {
+    const u = new URL(url);
+    if (u.pathname.length < 5 || u.hostname.includes("google.")) return undefined;
+    const resp = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(15000) });
+    return resp.ok ? (await resp.text()).slice(0, 200000) : undefined;
+  } catch { return undefined; }
+}
+
+// ---------- 5. Imagem e arquivo ----------
+
+function imagemDaPagina(html) {
+  const m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+  return m && /^https?:\/\//.test(m[1]) ? m[1].replace(/&amp;/g, "&") : undefined;
+}
 
 // Se o feed não trouxe imagem, tenta a imagem de capa da própria página (og:image).
 async function buscarImagem(url) {
   if (url.includes("news.google.com")) return undefined; // links do Google News não abrem fora do navegador
-  try {
-    const resp = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(15000) });
-    const html = (await resp.text()).slice(0, 200000);
-    const m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
-      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-    return m && /^https?:\/\//.test(m[1]) ? m[1].replace(/&amp;/g, "&") : undefined;
-  } catch { return undefined; }
+  const html = await baixarMateria(url);
+  return html ? imagemDaPagina(html) : undefined;
 }
 
 const slug = (t) => normalizar(t).split(" ").slice(0, 8).join("-");
@@ -262,24 +316,46 @@ if (!novos.length) {
   process.exit(0);
 }
 
-console.log(`\nMandando ${novos.length} itens para o Gemini (${MODELOS[0]})...`);
-const escolhidas = (await perguntarAoGemini(novos, titulosJaPublicados().slice(-40)))
+console.log(`\nPeneira: mandando ${novos.length} itens para o Gemini (${MODELOS[0]})...`);
+const candidatas = (await peneirar(novos, titulosJaPublicados().slice(-40)))
   .filter((n) => novos[n.id] && n.nota >= NOTA_RASCUNHO && CATEGORIAS.includes(n.categoria))
   .sort((a, b) => b.nota - a.nota)
-  .slice(0, MAX_POR_RODADA);
+  .slice(0, MAX_CANDIDATAS);
+console.log(`Passaram na peneira: ${candidatas.length}. O juiz confere as do Google News.\n`);
 
-console.log(`O Gemini escolheu ${escolhidas.length}:\n`);
-for (const n of escolhidas) {
+const aprovadas = [];
+for (const n of candidatas) {
+  if (aprovadas.length >= MAX_POR_RODADA) break;
   const it = novos[n.id];
+  if (!it.confiavel) {
+    let v;
+    try { v = await julgar(it, n); } catch (e) { v = { encontrou: false, motivo: e.message.slice(0, 150) }; }
+    if (!(v.encontrou && v.novidade && v.fonteConfiavel && v.aprovada && Number.isFinite(v.nota))) {
+      console.log(`[juiz: NÃO] ${it.titulo} (${it.fonte})\n   ${v.motivo || "sem motivo"}\n`);
+      continue;
+    }
+    // Usa o texto do juiz, que leu a notícia, no lugar do feito só pelo título
+    Object.assign(n, { titulo: v.titulo || n.titulo, resumo: v.resumo || n.resumo, nota: v.nota, regiao: v.regiao || n.regiao, tags: v.tags?.length ? v.tags : n.tags });
+    const html = v.fonte?.url ? await baixarMateria(v.fonte.url) : undefined;
+    if (html) {
+      it.url = v.fonte.url;
+      it.fonte = v.fonte.nome || it.fonte;
+      it.imagem = imagemDaPagina(html);
+    }
+    console.log(`[juiz: SIM] ${v.motivo}${html ? "" : " (endereço da matéria não confirmado; fica o link do Google News)"}`);
+    if (n.nota < NOTA_RASCUNHO) { console.log("   ...mas a nota do juiz ficou baixa, descartada.\n"); continue; }
+  }
   if (!it.imagem) it.imagem = await buscarImagem(it.url);
   const situacao = n.nota >= NOTA_PUBLICAR ? "publica" : "rascunho";
-  console.log(`[${n.nota} ${situacao}] ${n.categoria} | ${n.titulo}\n   ${n.resumo}\n   fonte: ${it.fonte}${it.imagem ? " (com imagem)" : ""}\n`);
+  console.log(`[${n.nota} ${situacao}] ${n.categoria} | ${n.titulo}\n   ${n.resumo}\n   fonte: ${it.fonte} | ${it.url.slice(0, 100)}${it.imagem ? " (com imagem)" : " (sem imagem)"}\n`);
+  aprovadas.push(n);
   if (!TESTE) salvarNoticia(it, n);
 }
+console.log(`Resultado: ${aprovadas.length} notícias.`);
 
 // Guarda tudo o que foi mandado para a IA, para não mandar de novo (e não gastar à toa)
 if (!TESTE) {
-  const urls = [...vistos.urls, ...novos.map((i) => i.url)].slice(-3000);
+  const urls = [...vistos.urls, ...novos.map((i) => i.linkDoFeed)].slice(-3000);
   const titulos = [...vistos.titulos, ...novos.map((i) => normalizar(i.titulo))].slice(-3000);
   fs.writeFileSync(ARQ_VISTOS, JSON.stringify({ urls, titulos }, null, 0) + "\n");
   console.log("Pronto: notícias salvas em src/content/noticias.");
