@@ -1,0 +1,14 @@
+{
+  "_leia": "Lista de onde o robô busca notícias. Para incluir uma fonte, copie uma linha e troque nome e url (precisa ser um feed RSS). Para desligar uma, mude ativa para false.",
+  "fontes": [
+    { "nome": "Google News: loteamentos", "url": "https://news.google.com/rss/search?q=loteamento+OR+%22condom%C3%ADnio+de+lotes%22+OR+%22bairro+planejado%22+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419", "ativa": true },
+    { "nome": "Google News: incorporação", "url": "https://news.google.com/rss/search?q=incorporadora+OR+%22lan%C3%A7amento+imobili%C3%A1rio%22+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419", "ativa": true },
+    { "nome": "Google News: legislação urbana", "url": "https://news.google.com/rss/search?q=%22plano+diretor%22+OR+Reurb+OR+%22lei+de+zoneamento%22+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419", "ativa": true },
+    { "nome": "Google News: crédito imobiliário", "url": "https://news.google.com/rss/search?q=%22cr%C3%A9dito+imobili%C3%A1rio%22+OR+INCC+OR+%22mercado+imobili%C3%A1rio%22+when:2d&hl=pt-BR&gl=BR&ceid=BR:pt-419", "ativa": true },
+    { "nome": "Estadão Imóveis", "url": "https://www.estadao.com.br/arc/outboundfeeds/feeds/rss/sections/economia/imoveis/", "ativa": true },
+    { "nome": "CBIC", "url": "https://www.cbic.org.br/feed/", "ativa": true },
+    { "nome": "Secovi-SP", "url": "https://www.secovi.com.br/feed", "ativa": true },
+    { "nome": "ArchDaily Brasil", "url": "https://www.archdaily.com.br/br/rss", "ativa": true },
+    { "nome": "Dezeen", "url": "https://www.dezeen.com/architecture/feed/", "ativa": true }
+  ]
+}

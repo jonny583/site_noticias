@@ -1,0 +1,41 @@
+# Robô de notícias: roda 3 vezes por dia, salva as notícias novas e envia ao GitHub.
+# A Vercel percebe o envio e monta o site de novo (isso também atualiza os posts do blog).
+name: Robô de notícias
+
+on:
+  schedule:
+    # Horário em UTC. 10h, 15h e 21h UTC = 7h, 12h e 18h em Brasília.
+    - cron: "0 10,15,21 * * *"
+  workflow_dispatch: # botão "Run workflow" para rodar na hora
+
+permissions:
+  contents: write
+
+concurrency:
+  group: robo-noticias
+  cancel-in-progress: false
+
+jobs:
+  garimpar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Buscar e resumir notícias
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node robo/robo.mjs
+      - name: Enviar ao GitHub
+        run: |
+          git config user.name "robo-noticias"
+          git config user.email "robo-noticias@users.noreply.github.com"
+          git add src/content/noticias robo/vistos.json
+          if git diff --cached --quiet; then
+            echo "Nada novo para enviar."
+            # Mesmo sem notícia nova, a Vercel não remonta o site; os posts do blog esperam a próxima.
+          else
+            git commit -m "Notícias do robô"
+            git push
+          fi
