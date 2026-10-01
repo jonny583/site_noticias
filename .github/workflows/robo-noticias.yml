@@ -3,9 +3,10 @@
 name: Robô de notícias
 
 on:
-  schedule:
-    # Horário em UTC. 10h, 15h e 21h UTC = 7h, 12h e 18h em Brasília.
-    - cron: "0 10,15,21 * * *"
+  # DESLIGADO até o usuário aprovar fontes e horários. Para ligar, tirar o # das 3 linhas abaixo.
+  # schedule:
+  #   # Horário em UTC. 10h, 15h e 21h UTC = 7h, 12h e 18h em Brasília.
+  #   - cron: "0 10,15,21 * * *"
   workflow_dispatch: # botão "Run workflow" para rodar na hora
 
 permissions:
