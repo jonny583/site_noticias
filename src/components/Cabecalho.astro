@@ -6,6 +6,8 @@ const { compacto = false } = Astro.props;
 const t = textos();
 const hoje = new Date().toLocaleDateString(localeData(), { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 const [a, b] = SITE.nomeMarca;
+const naoPonto = compacto || SITE.mascote !== "ponto";
+const mascote = { src: "/mascote/mascote-radar.mp4", poster: "/mascote/mascote-radar.jpg", autoplay: true, loop: true, muted: true, playsinline: true, "aria-hidden": "true" };
 ---
 <div class="topo">
   <div class="envelope">
@@ -19,8 +21,11 @@ const [a, b] = SITE.nomeMarca;
 <header class={compacto ? "cabecalho compacto" : "cabecalho"}>
   <div class="envelope">
     {!compacto && <div class="data" id="hoje">{hoje}</div>}
-    <a href="/" aria-label={SITE.nome}>
-      {compacto ? <div class="marca">{a}<span>.</span>{b}</div> : <h1 class="marca">{a}<span>.</span>{b}</h1>}
+    <a href="/" aria-label={SITE.nome} class="marca-linha">
+      {!compacto && SITE.mascote === "lado" && <video class="mascote" {...mascote}></video>}
+      {compacto
+        ? <div class="marca">{a}<span>.</span>{b}</div>
+        : <h1 class="marca">{a}{naoPonto ? <span>.</span> : <video class="mascote mascote-ponto" {...mascote}></video>}{b}</h1>}
     </a>
     {!compacto && <p class="lema">{t.lema}</p>}
   </div>

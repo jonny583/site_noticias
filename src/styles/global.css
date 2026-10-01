@@ -52,11 +52,18 @@ img { display: block; max-width: 100%; }
 @media (min-width: 720px) { .so-desktop { display: inline; } }
 
 /* Cabeçalho de jornal */
-.cabecalho { text-align: center; padding: 28px 0 18px; border-bottom: 3px double var(--tinta); }
+.cabecalho { background: var(--papel); text-align: center; padding: 28px 0 18px; border-bottom: 3px double var(--tinta); }
 .cabecalho .data { font: 500 12px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-2); }
 .marca { font-family: var(--serifa); font-weight: 800; font-size: clamp(40px, 9vw, 96px); line-height: .95; letter-spacing: -.035em; margin: 12px 0 10px; }
 .marca span { color: var(--acento); }
 .lema { margin: 0; color: var(--tinta-2); font-size: 15px; }
+/* Mascote da Archilly com o radar, ao lado do nome. O vídeo tem fundo branco:
+   "multiply" faz o branco sumir no papel claro; no tema escuro ele ganha um cartão claro. */
+.marca-linha { display: inline-flex; align-items: center; gap: clamp(6px, 1.5vw, 18px); color: inherit; }
+.mascote { height: clamp(64px, 13vw, 132px); aspect-ratio: 346 / 320; mix-blend-mode: multiply; pointer-events: none; }
+.marca .mascote-ponto { height: 1.15em; vertical-align: -0.12em; margin: 0 .04em 0 .02em; }
+:root[data-theme="dark"] .mascote { mix-blend-mode: normal; background: #fff; border-radius: 14px; padding: 4px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .mascote { mix-blend-mode: normal; background: #fff; border-radius: 14px; padding: 4px; } }
 
 /* Editorias */
 .editorias { border-bottom: 1px solid var(--linha); position: sticky; top: 0; z-index: 20; background: var(--papel); }

@@ -4,6 +4,8 @@ export const SITE = {
   nomeMarca: ["Radar", "Incorpora"], // exibido como "Radar.Incorpora" no cabeçalho
   url: "https://site-noticias-gules.vercel.app",
   archillyUrl: "https://archilly.com.br",
+  // Onde fica o mascote animado no topo: "lado" (à esquerda do nome) ou "ponto" (no lugar do ponto azul)
+  mascote: "ponto",
   colunista: "Jonny Stica",
   // Blog do colunista (WordPress): os posts mais recentes aparecem na Coluna da capa
   blogUrl: "https://stica.com.br/blog/",
